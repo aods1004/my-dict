@@ -8,8 +8,7 @@ const observer = new MutationObserver((mutations) => {
     mutations.forEach(() => {
         if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=/)) {
             if (window.location.href.length > 43) {
-                let url = window.location.href.substr(0, 43);
-                setCanonicalLinkTag(url);
+                setCanonicalLinkTag(window.location.href.substr(0, 43));
             }
         }
     });

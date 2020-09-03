@@ -3,6 +3,7 @@
 define("ROOT", dirname(__DIR__));
 
 $ex_data = file(ROOT . "/data/proper_noun_hatebu_ex.tsv");
+$fh = fopen(ROOT . "/dict/SNS_生成.txt", "w");
 
 $ex_notations = [];
 foreach($ex_data as $row) {
@@ -10,9 +11,8 @@ foreach($ex_data as $row) {
     $ex_notations[$normal] = $ex_notation;
 }
 
-$liver_data = file(ROOT . "/data/proper_noun.tsv");
-$fh = fopen(ROOT . "/dict/はてブタグ_固有名詞.txt", "w");
-foreach($liver_data as $row) {
+$proper_noun = file(ROOT . "/data/proper_noun.tsv");
+foreach($proper_noun as $row) {
     // var_dump(explode("\t", trim($row)));
     list($reading, $notation) = explode("\t", trim($row));
     if (isset($ex_notations[$reading])) {
@@ -20,5 +20,12 @@ foreach($liver_data as $row) {
     }
     fwrite($fh, "「$reading\t[$notation]\t固有名詞" . PHP_EOL);
 }
+$nijisanji_fanmark = file(ROOT . "/data/nijisanji_fanmark.tsv");
+foreach($nijisanji_fanmark as $row) {
+    // var_dump(explode("\t", trim($row)));
+    list($reading, $notation) = explode("\t", trim($row));
+    fwrite($fh, "：$reading\t$notation\t固有名詞" . PHP_EOL);
+}
+
 fwrite($fh, PHP_EOL);
 fclose($fh);
