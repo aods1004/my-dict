@@ -1,0 +1,13 @@
+{
+  "name": "aods1004/my-dict",
+  "description": "",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "config": {
+    "secure-http": false
+  },
+  "require": {
+    "guzzlehttp/guzzle": "^7.0",
+    "guzzlehttp/oauth-subscriber": "0.4.*"
+  }
+}
