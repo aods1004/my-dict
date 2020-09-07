@@ -4,3 +4,4 @@ _tmp
 composer.phar
 .idea
 vendor/*
+config.php

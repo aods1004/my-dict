@@ -6,7 +6,16 @@
   "config": {
     "secure-http": false
   },
+  "autoload": {
+    "files": [
+      "config.php",
+      "lib/function.php"
+    ]
+  },
   "require": {
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-simplexml": "*",
     "guzzlehttp/guzzle": "^7.0",
     "guzzlehttp/oauth-subscriber": "0.4.*"
   }

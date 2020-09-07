@@ -13,7 +13,12 @@ foreach($ex_data as $row) {
 
 $proper_noun = file(ROOT . "/data/proper_noun.tsv");
 foreach($proper_noun as $row) {
-    // var_dump(explode("\t", trim($row)));
+    if (substr($row, 0, 1) === '!') {
+        continue;
+    }
+    if (empty(trim($row))) {
+        continue;
+    }
     list($reading, $notation) = explode("\t", trim($row));
     if (isset($ex_notations[$reading])) {
         $notation = $ex_notations[$reading];
