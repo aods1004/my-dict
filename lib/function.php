@@ -16,13 +16,7 @@ function get_bookmark_client()
 
 function get_all_bookmarks($useOfflineRss = false)
 {
-    if ($useOfflineRss) {
-        // Download from https://b.hatena.ne.jp/-/my/config/data_management
-        $data = simplexml_load_file(ROOT_DIR . "/_tmp/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
-        foreach (isset($data->item) ? $data->item : [] as $item) {
-            yield ['url' => strval($item->link), 'title' => strval($item->title)];
-        }
-    }
+
     $client = get_bookmark_client();
     $page = 0;
     while (true) {
@@ -38,6 +32,13 @@ function get_all_bookmarks($useOfflineRss = false)
             break;
         }
         foreach ($items as $item) {
+            yield ['url' => strval($item->link), 'title' => strval($item->title)];
+        }
+    }
+    if ($useOfflineRss) {
+        // Download from https://b.hatena.ne.jp/-/my/config/data_management
+        $data = simplexml_load_file(ROOT_DIR . "/_tmp/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
+        foreach (isset($data->item) ? $data->item : [] as $item) {
             yield ['url' => strval($item->link), 'title' => strval($item->title)];
         }
     }
@@ -104,8 +105,7 @@ function show_hatena_authorize()
     $signatureBaseString = substr($signatureBaseString, 0, -1);
     $signatureBaseString = implode('&', ['GET', rawurlencode($url), rawurlencode($signatureBaseString)]);
     $signingKey = rawurlencode(HATENA_CONSUMER_SECRET) . '&';
-    $authorization['oauth_signature'] =
-        base64_encode(hash_hmac('sha1', $signatureBaseString, $signingKey, true));
+    $authorization['oauth_signature'] = base64_encode(hash_hmac('sha1', $signatureBaseString, $signingKey, true));
     $requestUrl = $url . '?';
     foreach ($authorization as $key => $val) {
         $requestUrl .= $key . '=' . rawurlencode($val) . '&';

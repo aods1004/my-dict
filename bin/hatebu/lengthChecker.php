@@ -2,13 +2,9 @@
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-
 $list = [
-    "この素晴らしい世界に祝福",
-    "転生したらスライムだった件",
-    "グウェル・オス・ガール",
-    "シェリン・バーガンディ",
-    "ベルモンド・バンデラス",
+    "📽慎重勇者～この勇者が俺TUEEEくせに慎重すぎる～",
+
 ];
 
 foreach ($list as $item) {

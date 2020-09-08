@@ -18,7 +18,7 @@ foreach (get_all_bookmarks(true) as $entry) {
             /**
              * タグ変換処理
              */
-            if (! empty($item['tags'])) {
+            if (!empty($item['tags'])) {
                 foreach ($item['tags'] as $key => $value) {
                     $exchange = [
                         "居室整備" => "🔖快適に家で過ごす",
@@ -26,6 +26,18 @@ foreach (get_all_bookmarks(true) as $entry) {
                         "グウェルオスガール" => "グウェル・オス・ガ…",
                         "ベルモンドバンデラス" => "ベルモンド・バンデ…",
                         "シェリンバーガンディ" => "シェリン・バーガン…",
+                        "HRTech" => "HrTech",
+                        "YouTube" => "🌐YouTube",
+                        "プレスリリース" => "📰プレスリリース",
+                        "この素晴らしい世界…" => "📽この素晴らしい世…",
+                        "Re：ゼロから始める異…" => "📽Re：ゼロから始め…",
+                        "転生したらスライム…" => "📽転生したらスライ…",
+                        "小林さんちのメイド…" => "📽小林さんちのメイ…",
+                        "城下町のダンデライ…" => "📽城下町のダンデラ…",
+                        "ソードアート・オン…" => "📽ソードアート・オ…",
+                        "盾の勇者の成り上がり" => "📽盾の勇者の成り上…",
+                        "亜人ちゃんは語りたい" => "📽亜人ちゃんは語り…",
+                        "ヘヴィーオブジェクト" => "📽ヘヴィーオブジェ…"
                     ];
                     foreach ($exchange as $from => $to) {
                         if ($value === $from) {
@@ -93,7 +105,7 @@ foreach (get_all_bookmarks(true) as $entry) {
              * 更新処理
              */
             if ($currentComment != $comment || $currentUrl != $url) {
-                if (! isset($history[$url])) {
+                if (!isset($history[$url])) {
                     $history[$url] = ['title' => $entry['title'], 'url' => $url, 'comment' => $comment];
                     echo "TITLE: " . $entry['title'] . PHP_EOL;
                     echo "URL: " . $url . PHP_EOL;
@@ -104,6 +116,11 @@ foreach (get_all_bookmarks(true) as $entry) {
                     echo "URL: " . $url . PHP_EOL;
                     echo "COMMENT: " . $comment . PHP_EOL;
                 }
+            }
+            if (empty($item['tags'])) {
+                echo "*** EMPTY ENTRY! ***" . PHP_EOL;
+                echo "URL: " . $url . PHP_EOL;
+                echo "COMMENT: " . $comment . PHP_EOL;
             }
         } else {
             echo "NOT FOUND: " . $url . PHP_EOL;
