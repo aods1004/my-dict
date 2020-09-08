@@ -27,7 +27,6 @@ foreach($proper_noun as $row) {
 }
 $nijisanji_fanmark = file(ROOT . "/data/nijisanji_fanmark.tsv");
 foreach($nijisanji_fanmark as $row) {
-    // var_dump(explode("\t", trim($row)));
     list($reading, $notation) = explode("\t", trim($row));
     fwrite($fh, "：$reading\t$notation\t固有名詞" . PHP_EOL);
 }

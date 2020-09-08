@@ -6,14 +6,72 @@ use GuzzleHttp\Subscriber\Oauth\Oauth1;
 
 require_once dirname(__DIR__) . "/vendor/autoload.php";
 
+function get_bookmark_client()
+{
+    return new Client([
+        'base_uri' => 'https://b.hatena.ne.jp/' . HATENA_MY_ACCOUNT . '/',
+        'http_errors' => false,
+    ]);
+}
+
+function get_all_bookmarks($useOfflineRss = false)
+{
+    if ($useOfflineRss) {
+        // Download from https://b.hatena.ne.jp/-/my/config/data_management
+        $data = simplexml_load_file(ROOT_DIR . "/_tmp/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
+        foreach (isset($data->item) ? $data->item : [] as $item) {
+            yield ['url' => strval($item->link), 'title' => strval($item->title)];
+        }
+    }
+    $client = get_bookmark_client();
+    $page = 0;
+    while (true) {
+        try {
+            $ret = $client->get("rss", ['query' => ["page" => $page++]]);
+        } catch (Throwable $exception) {
+            var_dump($exception);
+            break;
+        }
+        $data = simplexml_load_string($ret->getBody()->getContents());
+        $items = isset($data->item) ? $data->item : [];
+        if (empty($items)) {
+            break;
+        }
+        foreach ($items as $item) {
+            yield ['url' => strval($item->link), 'title' => strval($item->title)];
+        }
+    }
+}
+
+function build_hatena_bookmark_comment($item)
+{
+    if (empty($item['tags'])) {
+        return $item['comment'];
+    }
+    $tags = [];
+    foreach ($item['tags'] as $i => $tag) {
+        $tags[] = optimise_tag_text($tag);
+    }
+    sort($tags, SORT_LOCALE_STRING);
+    return "[" . implode("][", $tags) . "]" . $item['comment'];
+}
+
+function optimise_tag_text($text = "")
+{
+    while (strlen($text) > 32) {
+        $text = mb_substr($text, 0, mb_strlen($text) - 2) . "…";
+    }
+    return $text;
+}
+
 function get_bookmark_api_client()
 {
     $stack = HandlerStack::create();
     $middleware = new Oauth1([
-        'consumer_key'    => HATENA_CONSUMER_KEY,
+        'consumer_key' => HATENA_CONSUMER_KEY,
         'consumer_secret' => HATENA_CONSUMER_SECRET,
-        'token'           => HATENA_TOKEN,
-        'token_secret'    => HATENA_TOKEN_SECRET
+        'token' => HATENA_TOKEN,
+        'token_secret' => HATENA_TOKEN_SECRET
     ]);
     $stack->push($middleware);
     return new Client([
