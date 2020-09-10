@@ -4,7 +4,13 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 $list = [
     "📽慎重勇者～この勇者が俺TUEEEくせに慎重すぎる～",
-
+    "🎮Ring Fit Adventure",
+    "🎮Detroit：Become Human",
+    "🔖APEX部2434キルリレー",
+    "バーチャルYouTuber",
+    "インターネット文化",
+    "Apache Web Server",
+    "Open Source License",
 ];
 
 foreach ($list as $item) {
