@@ -20,30 +20,6 @@ function get_http_client() {
 
 function get_all_bookmarks($useOfflineRss = false)
 {
-    $client = get_bookmark_client();
-    $page = 0;
-    while (true) {
-        try {
-            $ret = $client->get("rss", ['query' => ["page" => $page++]]);
-        } catch (Throwable $exception) {
-            var_dump($exception);
-            break;
-        }
-        $data = simplexml_load_string($ret->getBody()->getContents());
-        $items = isset($data->item) ? $data->item : [];
-        if (empty($items)) {
-            break;
-        }
-
-        foreach ($items as $item) {
-            $tags = [];
-            $ns = $item->getNamespaces(true);
-            foreach($item->children($ns["dc"])->subject ?: [] as $tag) {
-                $tags[] = $tag;
-            }
-            yield ['url' => strval($item->link), 'title' => strval($item->title), 'tags' => $tags];
-        }
-    }
     if ($useOfflineRss) {
         // Download from https://b.hatena.ne.jp/-/my/config/data_management
         $data = simplexml_load_file(ROOT_DIR . "/_tmp/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
@@ -56,6 +32,31 @@ function get_all_bookmarks($useOfflineRss = false)
             yield ['url' => strval($item->link), 'title' => strval($item->title), 'tags' => $tags];
         }
     }
+
+    $client = get_bookmark_client();
+    $page = 1;
+    while (true) {
+        try {
+            $ret = $client->get("rss", ['query' => ["page" => $page++]]);
+        } catch (Throwable $exception) {
+            var_dump($exception);
+            break;
+        }
+        $data = simplexml_load_string($ret->getBody()->getContents());
+        $items = isset($data->item) ? $data->item : [];
+        if (empty($items)) {
+            break;
+        }
+        foreach ($items as $item) {
+            $tags = [];
+            $ns = $item->getNamespaces(true);
+            foreach($item->children($ns["dc"])->subject ?: [] as $tag) {
+                $tags[] = $tag;
+            }
+            yield ['url' => strval($item->link), 'title' => strval($item->title), 'tags' => $tags];
+        }
+    }
+
 }
 
 function build_hatena_bookmark_comment($item)

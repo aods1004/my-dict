@@ -10,7 +10,10 @@
     "files": [
       "config.php",
       "lib/function.php"
-    ]
+    ],
+    "psr-4": {
+      "Aods1004\\MyDict\\": "lib/class"
+    }
   },
   "require": {
     "ext-curl": "*",
