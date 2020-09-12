@@ -6,7 +6,7 @@ class UrlNormalizer
 {
     static function isTwitterUrl($url)
     {
-        if (preg_match("|^https://twitter.com/(\w+)$|", $url)) {
+        if (preg_match("|^https://twitter.com/|", $url)) {
             return true;
         }
         return false;
@@ -14,11 +14,11 @@ class UrlNormalizer
     static function isTweetUrl($url)
     {
         if (static::isTwitterUrl($url)) {
-            if (strpos('status', $url)) {
+            if (strpos($url, 'status')) {
                 return true;
             }
         }
-        return true;
+        return false;
     }
     static function normalizeTwitterUrl($url)
     {

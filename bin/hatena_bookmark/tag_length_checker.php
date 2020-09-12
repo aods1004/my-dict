@@ -21,6 +21,4 @@ foreach ($list as $item) {
     echo optimise_tag_text($item) . PHP_EOL;
 }
 
-var_dump(strpos("🌐YouTube", "🔖"));
-var_dump(strpos("🌐YouTube", "🌐"));
-var_dump(strpos("🌐YouTube", "💬"));
+var_dump();

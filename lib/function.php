@@ -35,36 +35,8 @@ function get_bookmark_feed_client($account)
     return new Client(['base_uri' => 'https://b.hatena.ne.jp/' . $account . '/']);
 }
 
-
 function get_all_bookmarks($useOfflineRss = false)
 {
-    $client = get_bookmark_feed_client(HATENA_MY_ACCOUNT);
-    $page = 1;
-    while (true) {
-        try {
-            $ret = $client->get("rss", ['query' => ["page" => $page++]]);
-        } catch (Throwable $exception) {
-            var_dump($exception);
-            break;
-        }
-        $data = simplexml_load_string($ret->getBody()->getContents());
-        $items = isset($data->item) ? $data->item : [];
-        if (empty($items)) {
-            break;
-        }
-        foreach ($items as $item) {
-            $tags = [];
-            $ns = $item->getNamespaces(true);
-            foreach ($item->children($ns["dc"])->subject ?: [] as $tag) {
-                $tags[] = $tag;
-            }
-            yield [
-                'url' => strval($item->link),
-                'title' => strval($item->title),
-                'tags' => $tags
-            ];
-        }
-    }
     if ($useOfflineRss) {
         // download from https://b.hatena.ne.jp/-/my/config/data_management
         $data = simplexml_load_file(ROOT_DIR . "/_tmp/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
@@ -82,6 +54,34 @@ function get_all_bookmarks($useOfflineRss = false)
                 'tags' => $tags
             ];
         }
+    } else {
+        $client = get_bookmark_feed_client(HATENA_MY_ACCOUNT);
+        $page = 1;
+        while (true) {
+            try {
+                $ret = $client->get("rss", ['query' => ["page" => $page++]]);
+            } catch (Throwable $exception) {
+                var_dump($exception);
+                break;
+            }
+            $data = simplexml_load_string($ret->getBody()->getContents());
+            $items = isset($data->item) ? $data->item : [];
+            if (empty($items)) {
+                break;
+            }
+            foreach ($items as $item) {
+                $tags = [];
+                $ns = $item->getNamespaces(true);
+                foreach ($item->children($ns["dc"])->subject ?: [] as $tag) {
+                    $tags[] = $tag;
+                }
+                yield [
+                    'url' => strval($item->link),
+                    'title' => strval($item->title),
+                    'tags' => $tags
+                ];
+            }
+        }
     }
 }
 
@@ -93,11 +93,9 @@ function tag_compare($a, $b)
         return $ret;
     }
     // 後ろに下げる
-    $ret = pattern_down_compare([
-            "✅", "🍀", "🚪", "🌐", "💬", "🎨",
-            "📓", "📚", "☕", "💿", "🎧",
-            "💪", "🍙", "💊", "💰", "🍬",
-            "📰", "🤣", "🎮",], $a, $b);
+    $ret = pattern_down_compare(
+        explode(",", "✅,🍀,🚪,🌐,💿,💬,🛒,🎨,✂,📓,📚,☕,💪,🍙,💊,💰,🍬,🎧,📰,🤣,🎮"),
+        $a, $b);
     if (! is_null($ret)) {
         return $ret;
     }
@@ -149,21 +147,26 @@ function build_hatena_bookmark_comment($item)
     foreach ($item['tags'] as $i => $tag) {
         $tags[] = optimise_tag_text($tag);
     }
+    $tags = array_unique($tags);
     usort($tags, 'tag_compare');
     $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
-    $tags = array_slice(array_unique($tags), 0, 10);
-    $item['comment'] = trim(preg_replace("/\s*⌚.*$/m", "", $item['comment']));
-    $item['comment'] = preg_replace("/ datetime:.*$/m", "", $item['comment']);
-    $item['comment'] = mb_substr($item['comment'], 0, 80);
+    $tags = array_slice($tags, 0, 10);
     if (!preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $item['comment'])) {
         $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
     }
-    return "[" . implode("][", $tags) . "]" . $item['comment'];
+    return ["[" . implode("][", $tags) . "]" . $item['comment'], $tags];
 }
 
-function count_tag($string)
+function count_helpful_tag(array $tags)
 {
-    return count(explode("[", $string)) - 1;
+    $count = 0;
+    $list = explode(",", "✅,🍀,🚪,🌐,💬,🎨,✂");
+    foreach ($tags as $tag) {
+        if (! in_array(mb_substr($tag, 0, 1), $list)) {
+            $count++;
+        }
+    }
+    return $count;
 }
 
 function optimise_tag_text($text = "")

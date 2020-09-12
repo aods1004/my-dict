@@ -55,6 +55,7 @@ class TagExchanger
             }
         }
         $tags = array_values($tags);
+        $appendTags = array_values($appendTags);
         $ret = array_unique(array_merge($tags, $appendTags));
         return $ret;
     }
