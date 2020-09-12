@@ -11,8 +11,16 @@ $list = [
     "インターネット文化",
     "Apache Web Server",
     "Open Source License",
+    "🎥ヴァイオレット・エヴァーガーデン",
+    "🎥ヴァイオレット･エヴァーガーデン",
+    "🌈グウェル・オス・ガール",
+    "🌈グウェル･オス･ガール",
 ];
 
 foreach ($list as $item) {
     echo optimise_tag_text($item) . PHP_EOL;
 }
+
+var_dump(strpos("🌐YouTube", "🔖"));
+var_dump(strpos("🌐YouTube", "🌐"));
+var_dump(strpos("🌐YouTube", "💬"));
