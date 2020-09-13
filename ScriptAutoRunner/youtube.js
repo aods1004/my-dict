@@ -4,6 +4,7 @@ if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=/)) {
 } else {
     setCanonicalLinkTag(window.location.href);
 }
+
 const observer = new MutationObserver((mutations) => {
     mutations.forEach(() => {
         if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=/)) {

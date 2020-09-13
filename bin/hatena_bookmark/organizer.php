@@ -11,7 +11,8 @@ $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client());
 
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
-foreach (get_all_bookmarks(true) as $bookmark) {
+$urls = [];
+foreach (get_all_bookmarks() as $bookmark) {
     echo "#### [$totalBookmarkCount] ####################################################" . PHP_EOL;
     try {
         $url = $bookmark['url'];
@@ -22,6 +23,11 @@ foreach (get_all_bookmarks(true) as $bookmark) {
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         if (empty($item)) {
             echo " ***** FAIL TO FETCH ITEM *****";
+            continue;
+        }
+        $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
+        if (empty($item)) {
+            echo " ***** FAIL TO FETCH ITEM *****" . PHP_EOL;
             continue;
         }
         // エントリーデータの取得・判定
@@ -59,11 +65,19 @@ foreach (get_all_bookmarks(true) as $bookmark) {
             $item['tags'] = $tagExchanger->markAsMove($item['tags']);
         }
         // 更新処理
+        $entryUrl = $entry->getUrl();
+        if (isset($urls[$entryUrl])) {
+            echo " ***** URLが重複しています *****" . PHP_EOL;
+            echo "CURRENT URL: {$initUrl}" . PHP_EOL;
+            echo "BEFORE  URL: {$urls[$entryUrl]}" . PHP_EOL;
+        }
+        $urls[$entryUrl] = $initUrl;
+
         if (count($item['tags']) > 10) {
             echo " ***** タグの数が多いです *****" . PHP_EOL;
         }
         list($comment, $tags) = build_hatena_bookmark_comment($item);
-        if (count_helpful_tag($tags) < 1) {
+        if (count_helpful_tag($tags ?: []) < 1) {
             echo " ***** タグの数が少ないです *****" . PHP_EOL;
         }
         if ($initComment != $comment) {
@@ -77,7 +91,7 @@ foreach (get_all_bookmarks(true) as $bookmark) {
                 echo " UPDATED COMMENT: " . $comment . PHP_EOL;
             }
         }
-        $totalTagCount += count_helpful_tag($tags);
+        $totalTagCount += count_helpful_tag($tags ?: []);
         $totalBookmarkCount += 1;
     } catch (Throwable $exception) {
         var_dump($exception);
