@@ -68,6 +68,16 @@ class UrlNormalizer
 
     static function removeHash($url)
     {
+        // ハッシュでSPAしているサイト一覧
+        $excludes = [
+            "https://www.yumenographia.com/"
+        ];
+
+        foreach ($excludes as $exclude) {
+            if (strpos($url, $exclude) !== false) {
+                return $url;
+            }
+        }
         if (preg_match("|^(.*)#|", $url, $match)) {
             $url = $match[1];
         }

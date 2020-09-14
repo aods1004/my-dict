@@ -63,7 +63,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/english.tsv") as $row) {
     }
     $data = $ruby_dict[$ruby];
     $data->name_eng = $english;
-    foreach (explode(' ', $english) as $word) {
+    foreach (preg_split('|[. ]|', $english) as $word) {
         $dic[] = strtolower($word);
     }
 }

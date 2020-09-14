@@ -15,11 +15,13 @@ $list = [
     "🎥ヴァイオレット･エヴァーガーデン",
     "🌈グウェル・オス・ガール",
     "🌈グウェル･オス･ガール",
-    "THE IDOLM@STER SHINY COLORS１１",
+    "🌈Melissa Kinrenka",
+    "🌈Shellin Burgundy",
+    "🌈Gwelu Os Gar",
+    "🌈Furen E Lustario",
+    "🌈Belmond Banderas",
 ];
 
 foreach ($list as $item) {
     echo optimise_tag_text($item) . PHP_EOL;
 }
-
-var_dump();
