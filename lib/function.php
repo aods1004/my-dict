@@ -26,7 +26,12 @@ function load_tsv($file_path)
         if (substr($row, 0, 1) === '!' || empty(trim($row))) {
             continue;
         }
-        yield explode("\t", trim($row));
+        $ret = [];
+        $data = explode("\t", $row);
+        foreach ($data as $datum) {
+            $ret[] = trim($datum);
+        }
+        yield $ret;
     }
 }
 
