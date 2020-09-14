@@ -11,7 +11,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
     $data->name = $name;
     $data->name_ruby = $ruby;
     $data->name_jpn = $name;
-    $data->name_alphabet = null;
+    $data->name_eng = null;
     $data->funmark = null;
     $data->funmarks = [];
     $data->twitter_url = null;
@@ -38,7 +38,6 @@ foreach (load_tsv(__DIR__ . "/data_raw/twitter.tsv") as $row) {
     list($ruby, $twitter_url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: twitter.tsv [$ruby]");
-        continue;
     }
     if(empty($twitter_url)) {
         continue;
@@ -53,9 +52,29 @@ foreach (load_tsv(__DIR__ . "/data_raw/twitter.tsv") as $row) {
     }
 }
 
+$dic = [];
+foreach (load_tsv(__DIR__ . "/data_raw/english.tsv") as $row) {
+    list($ruby, $english) = $row;
+    if (!isset($ruby_dict[$ruby])) {
+        throw new Error("ベースがありません: english.tsv [$ruby]");
+    }
+    if(empty($english)) {
+        continue;
+    }
+    $data = $ruby_dict[$ruby];
+    $data->name_eng = $english;
+    foreach (explode(' ', $english) as $word) {
+        $dic[] = strtolower($word);
+    }
+}
+
+sort($dic);
+array_unique($dic);
+
 $data = [];
 foreach ($ruby_dict as $item) {
     $data[] = get_object_vars($item);
 }
 
+file_put_contents(ROOT_DIR . "/dict/nijisanji_english_words.dic", implode(PHP_EOL, $dic));
 file_put_contents(__DIR__ . "/data/nijisanji_liver.json", json_encode($data));
