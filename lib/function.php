@@ -146,9 +146,8 @@ function pattern_down_compare($chars, $a, $b)
 function build_hatena_bookmark_comment($item)
 {
     $item['comment'] = isset($item['comment']) ? $item['comment'] : "";
-    if (empty($item['tags'])) {
-        return $item['comment'];
-    }
+    $item["created_epoch"] = isset($item['created_epoch']) ? $item['created_epoch'] : time();
+    $item['tags'] = !empty($item['tags']) ? $item['tags'] : [];
     $tags = [];
     foreach ($item['tags'] as $i => $tag) {
         $tags[] = optimise_tag_text($tag);

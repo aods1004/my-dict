@@ -11,7 +11,8 @@ $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client());
 
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
-$urls = [];
+$usedTagCount = [];
+//$urls = [];
 foreach (get_all_bookmarks() as $bookmark) {
     echo "#### [$totalBookmarkCount] ####################################################" . PHP_EOL;
     try {
@@ -65,13 +66,14 @@ foreach (get_all_bookmarks() as $bookmark) {
             $item['tags'] = $tagExchanger->markAsMove($item['tags']);
         }
         // 更新処理
-        $entryUrl = $entry->getUrl();
-        if (isset($urls[$entryUrl])) {
-            echo " ***** URLが重複しています *****" . PHP_EOL;
-            echo "CURRENT URL: {$initUrl}" . PHP_EOL;
-            echo "BEFORE  URL: {$urls[$entryUrl]}" . PHP_EOL;
-        }
-        $urls[$entryUrl] = $initUrl;
+//        $entryUrl = $entry->getUrl();
+//        if (isset($urls[$entryUrl])) {
+//            echo " ***** URLが重複しています *****" . PHP_EOL;
+//            echo "INIT URL: {$initUrl}" . PHP_EOL;
+//            echo "CURRENT URL: {$url}" . PHP_EOL;
+//            echo "BEFORE URL: {$urls[$entryUrl]}" . PHP_EOL;
+//        }
+//        $urls[$entryUrl] = $initUrl;
 
         if (count($item['tags']) > 10) {
             echo " ***** タグの数が多いです *****" . PHP_EOL;
@@ -81,7 +83,7 @@ foreach (get_all_bookmarks() as $bookmark) {
             echo " ***** タグの数が少ないです *****" . PHP_EOL;
         }
         if ($initComment != $comment) {
-            echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100). PHP_EOL;
+            echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100) . PHP_EOL;
             $resData = $bookmarkApiClient->post($url, $comment);
             if ($resData['comment_raw'] != $comment) {
                 echo " ***** FAILED TO UPDATE *****" . PHP_EOL;
@@ -91,6 +93,9 @@ foreach (get_all_bookmarks() as $bookmark) {
                 echo " UPDATED COMMENT: " . $comment . PHP_EOL;
             }
         }
+        foreach ($tags ?: [] as $tag) {
+            $usedTagCount[$tag] = (empty($usedTagCount[$tag])) ? 1 : ($usedTagCount[$tag] + 1);
+        }
         $totalTagCount += count_helpful_tag($tags ?: []);
         $totalBookmarkCount += 1;
     } catch (Throwable $exception) {
@@ -98,5 +103,30 @@ foreach (get_all_bookmarks() as $bookmark) {
         exit;
     }
 }
-echo "TOTAL BOOKMARK COUNT: " . $totalBookmarkCount . PHP_EOL;
-echo "TOTAL TAG COUNT: " . $totalTagCount . PHP_EOL;
+echo "==========================================================" . PHP_EOL;
+echo "  TOTAL BOOKMARK COUNT: " . $totalBookmarkCount . PHP_EOL;
+echo "==========================================================" . PHP_EOL;
+$apiClient = get_bookmark_api_client();
+$res = $apiClient->get("my/tags");
+$registeredTags = [];
+$myTags = json_decode($res->getBody()->getContents(), true);
+foreach ($myTags['tags'] as $item) {
+    $registeredTags[] = $item['tag'];
+}
+$usedTags = array_keys($usedTagCount);
+sort($usedTags);
+sort($registeredTags);
+echo "  TOTAL TAG COUNT: " . $totalTagCount . PHP_EOL;
+echo "  TOTAL REGISTERED TAG COUNT : " . count($registeredTags) . PHP_EOL;
+echo "  TOTAL USED TAG COUNT: " . count($usedTagCount) . PHP_EOL;
+$timestamp = date('Y-m-d_Hi');
+file_put_contents(__DIR__ . "/logs/{$timestamp}-利用タグ.txt", implode(PHP_EOL, $usedTags));
+file_put_contents(__DIR__ . "/logs/{$timestamp}-登録済タグ.txt", implode(PHP_EOL, $registeredTags));
+file_put_contents(__DIR__ . "/logs/{$timestamp}-差分.txt",
+    implode(PHP_EOL,
+        array_diff($registeredTags, $usedTags)
+        + ["------------"] +
+        array_diff($usedTags, $registeredTags)));
+
+exit;
+
