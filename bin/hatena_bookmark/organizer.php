@@ -122,11 +122,10 @@ echo "  TOTAL USED TAG COUNT: " . count($usedTagCount) . PHP_EOL;
 $timestamp = date('Y-m-d_Hi');
 file_put_contents(__DIR__ . "/logs/{$timestamp}-利用タグ.txt", implode(PHP_EOL, $usedTags));
 file_put_contents(__DIR__ . "/logs/{$timestamp}-登録済タグ.txt", implode(PHP_EOL, $registeredTags));
-file_put_contents(__DIR__ . "/logs/{$timestamp}-差分.txt",
-    implode(PHP_EOL,
-        array_diff($registeredTags, $usedTags)
-        + ["------------"] +
-        array_diff($usedTags, $registeredTags)));
+file_put_contents(__DIR__ . "/logs/{$timestamp}-差分.txt", "" .
+    implode(PHP_EOL, array_diff($registeredTags, $usedTags)) . PHP_EOL .
+    "------------------------------------------------------------" . PHP_EOL .
+    implode(PHP_EOL, array_diff($usedTags, $registeredTags)) . PHP_EOL);
 
 exit;
 

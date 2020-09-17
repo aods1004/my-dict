@@ -176,7 +176,7 @@ function count_helpful_tag(array $tags)
 
 function optimise_tag_text($text = "")
 {
-    while (strlen($text) > 32) {
+    while (strlen($text) > 33) {
         $text = mb_substr($text, 0, mb_strlen($text) - 2) . "…";
     }
     return $text;
