@@ -42,13 +42,17 @@ class BookmarkApiClient
 
     /**
      * @param $url
-     * @return mixed
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws GuzzleException
+     *
      */
     public function delete($url)
     {
-        $res = $this->client->delete("my/bookmark", ['query' => ['url' => $url]]);
-        return json_decode($res->getBody()->getContents(), true);
+        $res = $this->client->delete("my/bookmark", [
+            // 'query' => ['url' => $url],
+            "form_params" => ["url" => $url],
+        ]);
+        return $res;
     }
 
     /**
@@ -59,7 +63,7 @@ class BookmarkApiClient
      */
     public function post($url, $comment)
     {
-        $res = $this->client->post("my/bookmark?url=" . $url, ["form_params" => ["comment" => $comment]]);
+        $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
         return json_decode($res->getBody()->getContents(), true);;
     }
 

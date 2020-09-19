@@ -1,6 +1,8 @@
 <?php
 namespace Aods1004\MyDict;
 
+use function GuzzleHttp\Psr7\parse_query;
+
 class BookmarkEntry
 {
     /**
@@ -52,8 +54,23 @@ class BookmarkEntry
      */
     public function takeOverUrl($url)
     {
+
         if ($this->isValid() || $url != $this->getUrl()) {
-            return $this->getUrl();
+            $url = $this->getUrl();
+
+            $query = parse_url($url, PHP_URL_QUERY);
+            if ($query) {
+                $newQueries = [];
+                foreach (explode("&", $query) as $pair) {
+                    $queryItems = [];
+                    foreach (explode("=", $pair) as $i) {
+                        $queryItems[] = $i;
+                        // $queryItems[] = rawurlencode($i);
+                    }
+                    $newQueries[] = implode("=", $queryItems);
+                }
+                $url = str_replace($query, implode("&", $newQueries), $url);
+            }
         }
         return $url;
     }

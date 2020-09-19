@@ -192,6 +192,17 @@ foreach (load_tsv(__DIR__ . "/data_raw/name_jpn.tsv") as $row) {
     $data->name_jpn = $item;
 }
 
+/**
+ *   urlencode
+ * ----------------------------------------------------------------------------------------------
+ */
+$data = [];
+foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
+    list($ruby, $item) = $row;
+    $data[] = $ruby . "\t" .  trim($item) ."\t" . rawurlencode(trim($item));
+    file_put_contents(__DIR__ . "/data/name_urlencode.json", json_encode($data));
+}
+
 $template = [];
 $data = [];
 foreach ($ruby_dict as $item) {

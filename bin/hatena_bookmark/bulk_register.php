@@ -22,7 +22,7 @@ foreach (load_tsv(__DIR__ . "/data/一括登録.tsv") as $row) {
         $tags = $tagExchanger->optimise($tags);
         list($comment, $tags) = build_hatena_bookmark_comment(compact('tags'));
         echo "COMMENT: " . $comment . PHP_EOL;
-        $apiClient->post("my/bookmark?url=" . $url, ["form_params" => ["comment" => $comment]]);
+        $apiClient->post("my/bookmark",  ["form_params" => ["url" => $url, "comment" => $comment]]);
     } catch (Throwable $exception) {
         var_dump($exception);
     }

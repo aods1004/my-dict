@@ -65,6 +65,17 @@ class UrlNormalizer
         }
         return $url;
     }
+    static function isTikTokUrl($url)
+    {
+        if (preg_match("|^https://www.tiktok.com/|", $url)) {
+            return true;
+        }
+        return false;
+    }
+    static function normalizeTikTokUrl($url)
+    {
+        return $url;
+    }
 
     static function removeHash($url)
     {

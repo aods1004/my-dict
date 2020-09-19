@@ -18,17 +18,18 @@ foreach (get_all_bookmarks() as $bookmark) {
     try {
         $url = $bookmark['url'];
         $initUrl = $bookmark['url'];
-        echo " URL: {$url}" . PHP_EOL;
         // データ取得
         $item = $bookmarkApiClient->fetch($url, $bookmark['tags']);
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         if (empty($item)) {
             echo " ***** FAIL TO FETCH ITEM *****";
+            echo " URL: {$url}" . PHP_EOL;
             continue;
         }
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         if (empty($item)) {
             echo " ***** FAIL TO FETCH ITEM *****" . PHP_EOL;
+            echo " URL: {$url}" . PHP_EOL;
             continue;
         }
         // エントリーデータの取得・判定
@@ -56,13 +57,18 @@ foreach (get_all_bookmarks() as $bookmark) {
         if (UrlNormalizer::isAmazonProductUrl($url)) {
             $url = UrlNormalizer::normalizeAmazonProductUrl($url);
         }
+        // TikTok 処理
+        if (UrlNormalizer::isTikTokUrl($url)) {
+            $url = UrlNormalizer::normalizeTikTokUrl($url);
+        }
         // ハッシュ判定
         $url = UrlNormalizer::removeHash($url);
         // 削除処理
         if ($initUrl != $url) {
             echo " * DEL URL: $initUrl" . PHP_EOL;
             echo " * NEW URL: $url" . PHP_EOL;
-            $bookmarkApiClient->delete($initUrl);
+            $ret = $bookmarkApiClient->delete($initUrl);
+            echo " * DELETE STATUS CODE: " . $ret->getStatusCode() . PHP_EOL;
             $item['tags'] = $tagExchanger->markAsMove($item['tags']);
         }
         // 更新処理
@@ -76,13 +82,16 @@ foreach (get_all_bookmarks() as $bookmark) {
 //        $urls[$entryUrl] = $initUrl;
 
         if (count($item['tags']) > 10) {
+            echo " URL: {$url}" . PHP_EOL;
             echo " ***** タグの数が多いです *****" . PHP_EOL;
         }
         list($comment, $tags) = build_hatena_bookmark_comment($item);
         if (count_helpful_tag($tags ?: []) < 1) {
+            echo " URL: {$url}" . PHP_EOL;
             echo " ***** タグの数が少ないです *****" . PHP_EOL;
         }
         if ($initComment != $comment) {
+            echo " URL: {$url}" . PHP_EOL;
             echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100) . PHP_EOL;
             $resData = $bookmarkApiClient->post($url, $comment);
             if ($resData['comment_raw'] != $comment) {
