@@ -11,6 +11,17 @@ function get_http_client()
     return new Client(['http_errors' => false,]);
 }
 
+function check_url_status($url)
+{
+    $client = get_http_client();
+    try {
+        $ret = $client->get($url);
+        return $ret->getStatusCode();
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
 function array_equal($a, $b)
 {
     if (array_diff($a, $b) || array_diff($b, $a)) {
@@ -100,7 +111,7 @@ function tag_compare($a, $b)
     // 後ろに下げる
     $ret = pattern_down_compare(
         explode(",",
-            "✅,🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍙,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
+            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍙,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
         $a, $b);
     if (! is_null($ret)) {
         return $ret;
@@ -154,7 +165,7 @@ function build_hatena_bookmark_comment($item)
     }
     $tags = array_unique($tags);
     usort($tags, 'tag_compare');
-    $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
+    // $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
     $tags = array_slice($tags, 0, 10);
     if (!preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $item['comment'])) {
         $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
@@ -165,7 +176,7 @@ function build_hatena_bookmark_comment($item)
 function count_helpful_tag(array $tags)
 {
     $count = 0;
-    $list = explode(",", "✅,🍀,🚪,🌐,💬,🎨,✂");
+    $list = explode(",", "🍀,🚪,🌐,💬,🎨,✂");
     foreach ($tags as $tag) {
         if (! in_array(mb_substr($tag, 0, 1), $list)) {
             $count++;

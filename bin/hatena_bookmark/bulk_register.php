@@ -18,6 +18,11 @@ foreach (load_tsv(__DIR__ . "/data/一括登録.tsv") as $row) {
         if ($itemFetcher->fetch($url)) {
             continue;
         }
+        $status = check_url_status($url);
+        if ($status !== '200') {
+            echo " ***** 対象ページがありません ($status) *****" . PHP_EOL;
+            continue;
+        }
         $tags = $tagExchanger->exchange($tags);
         $tags = $tagExchanger->optimise($tags);
         list($comment, $tags) = build_hatena_bookmark_comment(compact('tags'));

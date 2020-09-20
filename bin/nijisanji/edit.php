@@ -7,15 +7,33 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
  * ----------------------------------------------------------------------------------------------
  */
 $data = [];
+$ruby_dict = [];
 foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
-    list($ruby, $item) = $row;
-    $data[] = $ruby . "\t" .  trim($item) ."\t" . rawurlencode(trim($item));
+    list($ruby, $name) = $row;
+    $data[] = $ruby . "\t" . trim($name) . "\t" . rawurlencode(trim($name));
+    $ruby_dict[$ruby] = $data;
 }
 file_put_contents(__DIR__ . "/data/name_urlencode.tsv", implode(PHP_EOL, $data));
 
+/**
+ *   タグのロード
+ * ----------------------------------------------------------------------------------------------
+ */
+$tags_dict = [];
+foreach (load_tsv(__DIR__ . "/data_raw/name_hatebu_tags.tsv") as $row) {
+    list($ruby, $tag) = $row;
+    $tags_dict[$ruby] = $tag;
+}
+
+
+/**
+ *   データ生成
+ * ----------------------------------------------------------------------------------------------
+ */
 $data = [];
 foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
     list($ruby, $item) = $row;
-    $data[] = $ruby . "\thttps://kai-you.net/word/" . rawurlencode(trim($item));
+    $tag = $tags_dict[$ruby];
+    $data[] = "https://dic.pixiv.net/a/" . rawurlencode(trim($item)) . "\t" . $tag . ",🌐ピクシブ百科辞典,🌐ピクシブ,🍀人名,🍀単語記事";
 }
-file_put_contents(__DIR__ . "/data/link_kai-you.tsv", implode(PHP_EOL, $data));
+file_put_contents(__DIR__ . "/data/output.tsv", implode(PHP_EOL, $data));

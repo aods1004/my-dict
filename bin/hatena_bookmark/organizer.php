@@ -81,10 +81,10 @@ foreach (get_all_bookmarks() as $bookmark) {
 //        }
 //        $urls[$entryUrl] = $initUrl;
 
-        if (count($item['tags']) > 10) {
-            echo " URL: {$url}" . PHP_EOL;
-            echo " ***** タグの数が多いです *****" . PHP_EOL;
-        }
+//        if (count($item['tags']) > 10) {
+//            echo " URL: {$url}" . PHP_EOL;
+//            echo " ***** タグの数が多いです *****" . PHP_EOL;
+//        }
         list($comment, $tags) = build_hatena_bookmark_comment($item);
         if (count_helpful_tag($tags ?: []) < 1) {
             echo " URL: {$url}" . PHP_EOL;
