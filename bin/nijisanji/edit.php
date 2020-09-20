@@ -33,6 +33,14 @@ foreach (load_tsv(__DIR__ . "/data_raw/name_hatebu_tags.tsv") as $row) {
 $data = [];
 foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
     list($url, $title, ) = $row;
+
+    preg_match("|\((.*)\)|", $title, $match);
+    var_dump($match[1]);
+    if (empty($match[1])) {
+        var_dump($row);
+        exit;
+    }
+
     $tag = $tags_dict[$ruby];
     if (trim($url)) {
         $url = str_replace(
