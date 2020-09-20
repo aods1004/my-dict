@@ -56,7 +56,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/name_fanmark.tsv") as $row) {
  *   YouTube
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(__DIR__ . "/data_raw/links_youtube.tsv") as $row) {
+foreach (load_tsv(__DIR__ . "/data_raw/links_mov_youtube.tsv") as $row) {
     list($ruby, $url, $title, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: links_youtube.tsv [$ruby]");
@@ -79,7 +79,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/links_youtube.tsv") as $row) {
  *   Twitter
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(__DIR__ . "/data_raw/links_twitter.tsv") as $row) {
+foreach (load_tsv(__DIR__ . "/data_raw/links_sentence _twitter.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: twitter.tsv [$ruby]");
@@ -101,7 +101,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/links_twitter.tsv") as $row) {
  *   Twitchasting
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(__DIR__ . "/data_raw/links_twitcasting.tsv") as $row) {
+foreach (load_tsv(__DIR__ . "/data_raw/links_live_twitcasting.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: links_twitcasting.tsv [$ruby]");
@@ -119,7 +119,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/links_twitcasting.tsv") as $row) {
  *   OPENREC
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(__DIR__ . "/data_raw/links_openrec.tsv") as $row) {
+foreach (load_tsv(__DIR__ . "/data_raw/links_live_openrec.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: links_openrec.tsv [$ruby]");
@@ -137,7 +137,7 @@ foreach (load_tsv(__DIR__ . "/data_raw/links_openrec.tsv") as $row) {
  *   Niconico
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(__DIR__ . "/data_raw/links_niconico.tsv") as $row) {
+foreach (load_tsv(__DIR__ . "/data_raw/links_mov_niconico.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
         throw new Error("ベースがありません: links_niconico.tsv [$ruby]");

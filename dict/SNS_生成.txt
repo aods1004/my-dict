@@ -135,14 +135,14 @@
 「るこ	[🌈❜ Ruco]	固有名詞
 「よみなみさくや	[🌈❜ 黄泉波咲夜]	固有名詞
 「りつめいかんきりこ	[🌈❜ 鹿鳴館キリコ]	固有名詞
-「たからでぃまん	[🌈🇮🇩 Taka Radjiman]	固有名詞
+「たからじまん	[🌈🇮🇩 Taka Radjiman]	固有名詞
 「ぜあこるねりあ	[🌈🇮🇩 ZEA Cornelia]	固有名詞
 「はなまきあ	[🌈🇮🇩 Hana Macchia]	固有名詞
 「らいがりれい	[🌈🇮🇩 Rai Galilei]	固有名詞
 「あみしあみしぇら	[🌈🇮🇩 Amicia Michella]	固有名詞
 「みゆおったゔぃあ	[🌈🇮🇩 Miyu Ottavia]	固有名詞
 「りくさでぃれんどら	[🌈🇮🇩 Riksa Dhirendra]	固有名詞
-「らいらあるすとろめりあ	[🌈🇮🇩 Layla Alstroemeria]	固有名詞
+「らいらあるすとろえめりあ	[🌈🇮🇩 Layla Alstroemeria]	固有名詞
 「ならはらまうん	[🌈🇮🇩 Nara Haramaung]	固有名詞
 「あずらせしりあ	[🌈🇮🇩 Azura Cecillia]	固有名詞
 「えとなくりむそん	[🌈🇮🇩 Etna Crimsona]	固有名詞
