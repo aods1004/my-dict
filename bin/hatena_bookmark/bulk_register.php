@@ -16,10 +16,11 @@ foreach (load_tsv(__DIR__ . "/data/一括登録.tsv") as $row) {
         echo "URL: " . $url . PHP_EOL;
         $tags = explode(',', $tags);
         if ($itemFetcher->fetch($url)) {
+            echo " ***** すでに登録されています ($url) *****" . PHP_EOL;
             continue;
         }
         $status = check_url_status($url);
-        if ($status !== '200') {
+        if ($status != '200') {
             echo " ***** 対象ページがありません ($status) *****" . PHP_EOL;
             continue;
         }

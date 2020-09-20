@@ -31,9 +31,23 @@ foreach (load_tsv(__DIR__ . "/data_raw/name_hatebu_tags.tsv") as $row) {
  * ----------------------------------------------------------------------------------------------
  */
 $data = [];
-foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
-    list($ruby, $item) = $row;
+foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
+    list($url, $title, ) = $row;
     $tag = $tags_dict[$ruby];
-    $data[] = "https://dic.pixiv.net/a/" . rawurlencode(trim($item)) . "\t" . $tag . ",🌐ピクシブ百科辞典,🌐ピクシブ,🍀人名,🍀単語記事";
+    if (trim($url)) {
+        $url = str_replace(
+            "https://www.youtube.com/channel/",
+            "https://vtuber-post.com/database/detail.php?id=",
+            $url
+            );
+        $data[] = $url . "\t" . $tag . ",🌐Vtuber post";
+    }
 }
 file_put_contents(__DIR__ . "/data/output.tsv", implode(PHP_EOL, $data));
+//$data = [];
+//foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
+//    list($ruby, $item) = $row;
+//    $tag = $tags_dict[$ruby];
+//    $data[] = "https://dic.pixiv.net/a/" . rawurlencode(trim($item)) . "\t" . $tag . ",🌐ピクシブ百科辞典,🌐ピクシブ,🍀人名,🍀単語記事";
+//}
+
