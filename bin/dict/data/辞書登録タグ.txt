@@ -29,7 +29,7 @@ Web制作
 ⌨SQL
 ⌨TypeScript
 ⌨Web技術
-⌨Youtube Data API
+⌨YouTube Data API
 ⌨エンジニア
 ⌨クラウド技術
 ⌨システム設計
@@ -70,15 +70,14 @@ Web制作
 プッシュ通知
 プラモデル
 ホロライブ
-効果音
 収納
 婚活
-完全栄養食
 教育・育児
 文字入力
 文字起こし
 文房具
 文章術
+映画
 素材
 統計データ
 衛生管理者
@@ -97,16 +96,22 @@ Web制作
 🀄麻雀警察ひろー
 🀄齋藤豪
 🌈❜ Ruco
+🌈❜ でびっち
+🌈❜ 剣持刀子
+🌈❜ 剣持力也
 🌈❜ 月野美兎
+🌈❜ 渋谷オワリ
 🌈❜ 空星キラト
 🌈❜ 花伏しほ
 🌈❜ 角無絵里華
+🌈❜ 野良猫
 🌈❜ 鹿鳴館キリコ
 🌈❜ 黄泉波咲夜
 🌈えま★おうがすと
 🌈しのごの
 🌈でびでび・でびる
 🌈にじさんじ
+🌈にじさんじSEEDs
 🌈ぷちさんじ
 🌈ましろ
 🌈ゆがみん
@@ -238,10 +243,17 @@ Web制作
 🌈🇨🇳 萨麦尔(Samael)
 🌈🇨🇳 阿萨(Aza)
 🌈🇨🇳 雪絵(Yukie)
+🌈🇨🇳😥 Hakuren
+🌈🇨🇳😥 Kaen
+🌈🇨🇳😥 Lorou
+🌈🇨🇳😥 Yu Ruri
+🌈🇨🇳😥 帕克丝(Pax)
+🌈🇨🇳😥 御水(Mimoi)
+🌈🇨🇳😥 羽音(Hanon)
 🌈🇮🇩 Amicia Michella
 🌈🇮🇩 Azura Cecillia
 🌈🇮🇩 Bonnivier Pranaja
-🌈🇮🇩 Etna Crimsona
+🌈🇮🇩 Etna Crimson
 🌈🇮🇩 Hana Macchia
 🌈🇮🇩 Layla Alstroemeria
 🌈🇮🇩 Miyu Ottavia
@@ -297,8 +309,10 @@ Web制作
 🌈👥でびリオン
 🌈👥でろンボ
 🌈👥にじさんじGALS
+🌈👥にじさんじポン酢
 🌈👥にじレジ
 🌈👥にじレジ(株)
+🌈👥はるぶし
 🌈👥ぶるーず
 🌈👥まななつ
 🌈👥みかえる
@@ -314,6 +328,7 @@ Web制作
 🌈👥メイフ
 🌈👥メッシャーズ
 🌈👥一期生出身
+🌈👥世怜音女学院
 🌈👥夜王国
 🌈👥晴レ日
 🌈👥楓と美兎
@@ -340,13 +355,15 @@ Web制作
 🌐Github
 🌐Google
 🌐Instagram
+🌐KAI-YOU.net
 🌐Mirrative
 🌐OPENREC
-🌐Pixiv
+🌐PLAYBOARD
 🌐SHOWROOM
 🌐TikTok
 🌐Twitch
 🌐Twitter
+🌐Vtuber post
 🌐Webサービス
 🌐Wikipedia
 🌐YouTube
@@ -355,17 +372,22 @@ Web制作
 🌐niconico
 🌐note
 🌐はてなブックマーク
+🌐ツイキャス
+🌐ピクシブ
+🌐ピクシブ百科辞典
 🌐ユーチュラ
 🍀えとなくりむそん
 🍀人名
 🍀単語記事
-🍙食べ物・飲み物
 🍬おかし
+🍽食べ物・飲み物
 🎓IT教育
 🎓ソフトウェア工学
 🎓バイオテクノロジー
 🎓国際経済法
+🎓数学
 🎓文化論・社会論
+🎓文学
 🎓歴史・政治
 🎓簿記
 🎓経済学
@@ -391,8 +413,11 @@ Web制作
 🎥ONE PIECE
 🎥Re：ゼロから始める異世界生活
 🎥STEINS;GATE
+🎥からかい上手の高木さん
 🎥がっこうぐらし！
 🎥この素晴らしい世界に祝福を
+🎥たまこまーけっと
+🎥たまこラブストーリー
 🎥ぼくらの
 🎥まおゆう
 🎥アクセル・ワールド
@@ -410,10 +435,12 @@ Web制作
 🎥六花の勇者
 🎥名探偵コナン
 🎥城下町のダンデライオン
+🎥境界の彼方
 🎥天空の城ラピュタ
 🎥小林さんちのメイドラゴン
 🎥幼女戦記
 🎥慎重勇者～この勇者が俺TUEEEくせに慎重すぎる～
+🎥放課後さいころ倶楽部
 🎥新世界より
 🎥氷菓
 🎥涼宮ハルヒの憂鬱
@@ -442,8 +469,10 @@ Web制作
 🎮Craftopia
 🎮Detroit Become Human
 🎮Fall Guys
+🎮League of Legends
 🎮Minecraft
 🎮Ring Fit Adventure
+🎮SUPER DONKEY KONG
 🎮Slay the Spire
 🎮Splatoon
 🎮Terraria
@@ -459,12 +488,14 @@ Web制作
 🎮ボードゲーム
 🎮ポケットモンスター
 🎮メダロット
+🎮リズム天国
 🎮世界のアソビ大全
 🎮世界樹の迷宮
 🎮天鳳
 🎮艦これ
 🎮雀魂
 🎮麻雀
+🏆記念サイト
 🏢ASUS
 🏢DeNa
 🏢Microsoft
@@ -504,6 +535,7 @@ Web制作
 👤小松未可子
 👤山里亮太
 👤岩明均
+👤川原礫
 👤星街すいせい
 👤朝陽にいな
 👤桃乃ゆらり
@@ -612,6 +644,7 @@ Web制作
 📚NIJISANJI Illustrations vol.1
 📚コンテナ物語
 📚知的生産の技術
+📣効果音
 📰ニュース
 📰プレスリリース
 🔖
@@ -630,10 +663,12 @@ Web制作
 🔖艦これ攻略情報
 🔖🌈にじFes2021
 🔧工作動画
+🗣フリーチャット
 🗣ラジオ
 🗣雑談動画
 🚪移動
 🛏睡眠導入動画
 🛒買い物
 🤣ネタ
+🥫完全栄養食
 🦗昆虫食

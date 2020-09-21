@@ -10,6 +10,15 @@ function get_http_client()
 {
     return new Client(['http_errors' => false,]);
 }
+function get($url, array $option = []) {
+    $client = get_http_client();
+    try {
+        $ret = $client->get($url, $option);
+        return json_decode($ret->getBody()->getContents(), true);
+    } catch (Throwable $e) {
+        return null;
+    }
+}
 
 function check_url_status($url)
 {
@@ -111,7 +120,7 @@ function tag_compare($a, $b)
     // 後ろに下げる
     $ret = pattern_down_compare(
         explode(",",
-            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍙,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
+            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍽,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
         $a, $b);
     if (! is_null($ret)) {
         return $ret;

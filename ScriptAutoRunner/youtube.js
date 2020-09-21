@@ -1,5 +1,5 @@
 let currentUrl = "";
-if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=/)) {
+if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?(.*)?v=/)) {
     setCanonicalLinkTag(window.location.href.substr(0, 43));
 } else {
     setCanonicalLinkTag(window.location.href);
@@ -36,3 +36,13 @@ function setCanonicalLinkTag(url) {
     }
 }
 
+setInterval(function () {
+    if (! window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/)) {
+        const videoIdMatcher = window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?(.*)?(v=[\w-]+)/)[2];
+        history.replaceState('','','/watch?' + videoIdMatcher);
+    }
+    if (! window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/[^?]+\?.*$/)) {
+        const matcher = window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/([^?]+)\?.*$/)[2];
+        history.replaceState('','','/channel/' + matcher);
+    }
+}, 250);

@@ -11,14 +11,15 @@ observer.observe(
 
 function adjustCanonicalLinkTag() {
     let links = document.getElementsByTagName("link");
-    let matches, url;
+    let matches, url, path;
     for (let i = 0; i < links.length; i++) {
         if (links[i].rel === "canonical") {
             matches = links[i].href.match(/\/dp\/(\w+)/);
             if (matches[1]) {
-                url = "https://www.amazon.co.jp/gp/product/" + matches[1];
+                path = "/gp/product/" + matches[1];
+                url = "https://www.amazon.co.jp" + path;
                 if (url !== window.location.href) {
-                    window.location.href = url;
+                    history.replaceState('','',path);
                 }
                 links[i].remove();
                 let canonicalLinkTag = window.document.createElement('link');
