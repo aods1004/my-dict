@@ -120,7 +120,7 @@ function tag_compare($a, $b)
     // 後ろに下げる
     $ret = pattern_down_compare(
         explode(",",
-            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍽,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
+            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍴,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
         $a, $b);
     if (! is_null($ret)) {
         return $ret;
@@ -196,6 +196,8 @@ function count_helpful_tag(array $tags)
 
 function optimise_tag_text($text = "")
 {
+    $text = trim($text);
+    $text = strtr($text, ["[" => "", "]" => "", "　" => " "]);
     while (strlen($text) > 33) {
         $text = mb_substr($text, 0, mb_strlen($text) - 2) . "…";
     }

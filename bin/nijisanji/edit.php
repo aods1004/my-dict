@@ -29,13 +29,17 @@ foreach (load_tsv(__DIR__ . "/data_raw/name_hatebu_tags.tsv") as $row) {
  *   データ生成
  * ----------------------------------------------------------------------------------------------
  */
+$output = [];
 $input_dict = [];
 foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
-    list($ruby, $url,) = $row;
-    $tag = $tags_dict[$ruby];
-    if (trim($url)) {
-        $input_dict[$ruby] = "$url\t$tag,🗣フリーチャット";
-    }
+    list($ruby, $word,) = $row;
+
+    $output[] = "$ruby\t🌈👥$word";
+
+//    $tag = $tags_dict[$ruby];
+//    if (trim($url)) {
+//        $input_dict[$ruby] = "$url\t$tag,🗣フリーチャット";
+//    }
 //    preg_match("/^([^\(]*)(\(.*)? [|(]/", $title, $match);
 //    if (empty($name_ruby_dict[$match[1]])) {
 //        echo "not found: " . $match[1];
@@ -48,6 +52,11 @@ foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
 //    $input_dict[$ruby] .= "$url\t" . $tag . ",🌐UserLocal";
     // $input_dict[$ruby] = "$ruby\t" . str_replace("https://", "https://b.hatena.ne.jp/entry/s/", $url);
 }
+if ($output) {
+    file_put_contents(__DIR__ . "/data/output.tsv", implode(PHP_EOL, $output));
+    exit;
+}
+
 
 $output = [];
 foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {

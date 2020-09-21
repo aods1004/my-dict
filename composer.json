@@ -21,6 +21,8 @@
     "ext-mbstring": "*",
     "ext-simplexml": "*",
     "guzzlehttp/guzzle": "^7.0",
-    "guzzlehttp/oauth-subscriber": "0.4.*"
+    "guzzlehttp/oauth-subscriber": "0.4.*",
+    "google/apiclient": "^2.7"
+
   }
 }
