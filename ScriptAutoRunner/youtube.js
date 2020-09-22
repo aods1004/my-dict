@@ -61,4 +61,17 @@ setInterval(function () {
             history.replaceState('','','/channel/' + match);
         }
     }
+    /**
+     * User
+     */
+    if (window.location.href.match(/^https:\/\/www\.youtube\.com\/user/)) {
+        if (window.location.href.match(/^https:\/\/www\.youtube\.com\/user\/[^?]+\?.*$/)) {
+            match = window.location.href.match(/^https:\/\/www\.youtube\.com\/user\/([^?]+)\?.*$/)[1];
+            history.replaceState('','','/user/' + match);
+        }
+        if (window.location.href.match(/\/featured$/)) {
+            match = window.location.href.match(/^https:\/\/www\.youtube\.com\/user\/([^/]+)/)[1];
+            history.replaceState('','','/user/' + match);
+        }
+    }
 }, 250);
