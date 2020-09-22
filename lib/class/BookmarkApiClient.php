@@ -4,6 +4,7 @@ namespace Aods1004\MyDict;
 
 use GuzzleHttp\Client;
 use \GuzzleHttp\Exception\GuzzleException;
+use \Psr\Http\Message\ResponseInterface;
 
 /**
  * Class BookmarkApiClient
@@ -42,7 +43,7 @@ class BookmarkApiClient
 
     /**
      * @param $url
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return ResponseInterface
      * @throws GuzzleException
      *
      */
@@ -64,7 +65,7 @@ class BookmarkApiClient
     public function post($url, $comment)
     {
         $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
-        return json_decode($res->getBody()->getContents(), true);;
+        return json_decode($res->getBody()->getContents(), true);
     }
 
     /**
@@ -76,7 +77,10 @@ class BookmarkApiClient
     {
         $res = $this->client->get("entry", ['query' => ['url' => $url]]);
         $entry = json_decode($res->getBody()->getContents(), true);
-        return new BookmarkEntry($entry);
+        if ($entry) {
+            return new BookmarkEntry($entry);
+        }
+        return null;
     }
 
 }

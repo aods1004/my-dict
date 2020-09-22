@@ -1,8 +1,9 @@
 <?php
 namespace Aods1004\MyDict;
-
-use function GuzzleHttp\Psr7\parse_query;
-
+/**
+ * Class BookmarkEntry
+ * @package Aods1004\MyDict
+ */
 class BookmarkEntry
 {
     /**

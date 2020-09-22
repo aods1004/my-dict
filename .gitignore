@@ -1,7 +1,8 @@
 secret.txt
-ユーザー辞書.txt
+user.txt
 _tmp
 composer.phar
 .idea
 vendor/*
 config.php
+_logs
