@@ -18,18 +18,12 @@ foreach (get_all_bookmarks() as $bookmark) {
         $initUrl = $bookmark['url'];
         // データ取得
         $item = $bookmarkApiClient->fetch($url, $bookmark['tags']);
-        $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
-        if (empty($item)) {
-            echo " ##### FAIL TO FETCH ITEM #####";
-            echo " * URL: {$url}" . PHP_EOL;
-            continue;
-        }
-        $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         if (empty($item)) {
             echo " ##### FAIL TO FETCH ITEM #####" . PHP_EOL;
             echo " * URL: {$url}" . PHP_EOL;
             continue;
         }
+        $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         // エントリーデータの取得・判定
         $entry = $bookmarkApiClient->fetchEntry($url);
         if (empty($entry)) {
@@ -72,7 +66,6 @@ foreach (get_all_bookmarks() as $bookmark) {
             echo " * NEW URL: $url" . PHP_EOL;
             $ret = $bookmarkApiClient->delete($initUrl);
             echo " * DELETE STATUS CODE: " . $ret->getStatusCode() . PHP_EOL;
-            $item['tags'] = $tagExchanger->markAsMove($item['tags']);
         }
         list($comment, $tags) = build_hatena_bookmark_comment($item);
         if (count_helpful_tag($tags ?: []) < 1) {
@@ -118,8 +111,8 @@ echo "  TOTAL TAG COUNT: " . $totalTagCount . PHP_EOL;
 echo "  TOTAL REGISTERED TAG COUNT : " . count($registeredTags) . PHP_EOL;
 echo "  TOTAL USED TAG COUNT: " . count($usedTagCount) . PHP_EOL;
 $timestamp = date('Y-m-d_Hi');
-file_put_contents(ROOT_DIR . "/logs/hatebu_used_tags_{$timestamp}.txt", implode(PHP_EOL, $usedTags));
-file_put_contents(ROOT_DIR . "/logs/hatebu_diff_tags_{$timestamp}.txt", "" .
+file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.txt", implode(PHP_EOL, $usedTags));
+file_put_contents(ROOT_DIR . "/_logs/hatebu_diff_tags_{$timestamp}.txt", "" .
     implode(PHP_EOL, array_diff($registeredTags, $usedTags)) . PHP_EOL .
     "------------------------------------------------------------" . PHP_EOL .
     implode(PHP_EOL, array_diff($usedTags, $registeredTags)) . PHP_EOL);

@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__) . "/../vendor/autoload.php";
+
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
@@ -137,7 +139,7 @@ function build_hatena_bookmark_comment($item)
 function count_helpful_tag(array $tags)
 {
     $count = 0;
-    $list = explode(",", "🍀,🚪,🌐,💬,🎨,✂");
+    $list = explode(",", "🍀,🚪,💬,🎨,✂");
     foreach ($tags as $tag) {
         if (! in_array(mb_substr($tag, 0, 1), $list)) {
             $count++;
@@ -199,7 +201,7 @@ function get_tag_exchanger() {
         $exclude[] = $row[0];
     }
     $extractKeywords = [];
-    foreach (load_tsv(ROOT_DIR . "/data/tags_keywords.tsv") as $row) {
+    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
         list($from, $to) = $row;
         if (!isset($row[1])) {
             exit;

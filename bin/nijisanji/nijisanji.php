@@ -59,7 +59,7 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name_fanmark.tsv") as $row
 foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_mov_youtube.tsv") as $row) {
     list($ruby, $url, $title, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: links_youtube.tsv [$ruby]");
+        throw new Error("ベースがありません: links_mov_youtube.tsv [$ruby]");
     }
     if(empty($url)) {
         continue;
@@ -79,10 +79,10 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_mov_youtube.tsv") as
  *   Twitter
  * ----------------------------------------------------------------------------------------------
  */
-foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_sentence _twitter.tsv") as $row) {
+foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_sentence_twitter.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: twitter.tsv [$ruby]");
+        throw new Error("ベースがありません: links_sentence_twitter.tsv [$ruby]");
     }
     if(empty($url)) {
         continue;
@@ -104,7 +104,7 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_sentence _twitter.ts
 foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_live_twitcasting.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: links_twitcasting.tsv [$ruby]");
+        throw new Error("ベースがありません: links_live_twitcasting.tsv [$ruby]");
     }
     if(empty($url)) {
         continue;
@@ -122,7 +122,7 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_live_twitcasting.tsv
 foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_live_openrec.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: links_openrec.tsv [$ruby]");
+        throw new Error("ベースがありません: links_live_openrec.tsv [$ruby]");
     }
     if(empty($url)) {
         continue;
@@ -140,7 +140,7 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_live_openrec.tsv") a
 foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/links_mov_niconico.tsv") as $row) {
     list($ruby, $url, $primary) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: links_niconico.tsv [$ruby]");
+        throw new Error("ベースがありません: links_mov_niconico.tsv [$ruby]");
     }
     if(empty($url)) {
         continue;
@@ -183,7 +183,7 @@ file_put_contents(ROOT_DIR . "/dict/nijisanji_english_words.dic", implode(PHP_EO
 foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name_jpn.tsv") as $row) {
     list($ruby, $item) = $row;
     if (!isset($ruby_dict[$ruby])) {
-        throw new Error("ベースがありません: japanese.tsv [$ruby]");
+        throw new Error("ベースがありません: name_jpn.tsv [$ruby]");
     }
     if(empty($item)) {
         continue;
@@ -192,21 +192,10 @@ foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name_jpn.tsv") as $row) {
     $data->name_jpn = $item;
 }
 
-/**
- *   urlencode
- * ----------------------------------------------------------------------------------------------
- */
-$data = [];
-foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
-    list($ruby, $item) = $row;
-    $data[] = $ruby . "\t" .  trim($item) ."\t" . rawurlencode(trim($item));
-    file_put_contents(ROOT_DIR . "/output/name_urlencode.json", json_encode($data));
-}
-
 $template = [];
 $data = [];
 foreach ($ruby_dict as $item) {
     $data[] = get_object_vars($item);
     $template = [];
 }
-file_put_contents(__DIR__ . "/data/nijisanji_liver.json", json_encode($data));
+file_put_contents(ROOT_DIR . "/output/nijisanji_liver.json", json_encode($data));

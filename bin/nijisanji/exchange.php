@@ -2,29 +2,10 @@
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-/**
- *   urlencode
- * ----------------------------------------------------------------------------------------------
- */
-$data = [];
-$ruby_dict = [];
-$name_ruby_dict = [];
-foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
-    list($ruby, $name) = $row;
-    $data[] = $ruby . "\t" . trim($name) . "\t" . rawurlencode(trim($name));
-    $ruby_dict[$ruby] = $data;
-    $name_ruby_dict[$name] = $ruby;
-}
-file_put_contents(__DIR__ . "/data/urlencoded_name.tsv", implode(PHP_EOL, $data));
-/**
- *   タグのロード
- * ----------------------------------------------------------------------------------------------
- */
-$tags_dict = [];
-foreach (load_tsv(__DIR__ . "/data_raw/name_hatebu_tags.tsv") as $row) {
-    list($ruby, $tag) = $row;
-    $tags_dict[$ruby] = $tag;
-}
+$ruby_tag_dict = get_ruby_tag_dict();
+$name_ruby_dict = get_name_ruby_dict();
+$tagExchanger = get_tag_exchanger();
+
 /**
  *   データ生成
  * ----------------------------------------------------------------------------------------------
@@ -79,4 +60,4 @@ foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
     // $data[] = "$ruby\t" . $url;
 }
 
-file_put_contents(__DIR__ . "/data/output.tsv", implode(PHP_EOL, $output));
+file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));

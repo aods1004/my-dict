@@ -97,14 +97,4 @@ class TagExchanger
         }
         return $tags;
     }
-
-    /**
-     * @param array $tags
-     * @return array
-     */
-    public function markAsMove(array $tags)
-    {
-        return hatena_bookmark_try_to_append_tag($tags, "🚪移動");
-    }
-
 }
