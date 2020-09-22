@@ -27,7 +27,6 @@ function setCanonicalLinkTag(url) {
                 links[i].remove();
             }
         }
-        console.log("canonical uri を「" + url + "」に変更しました");
         let canonicalLinkTag = window.document.createElement('link');
         canonicalLinkTag.rel = "canonical";
         canonicalLinkTag.href = url;
@@ -37,12 +36,29 @@ function setCanonicalLinkTag(url) {
 }
 
 setInterval(function () {
-    if (! window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/)) {
-        const videoIdMatcher = window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?(.*)?(v=[\w-]+)/)[2];
-        history.replaceState('','','/watch?' + videoIdMatcher);
+    let match;
+    /**
+     * Watch
+     */
+    if (window.location.href.match(/^https:\/\/www\.youtube\.com\/watch/)) {
+        if (! window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/)) {
+            const match = window.location.href.match(/^https:\/\/www\.youtube\.com\/watch\?(.*)?(v=[\w-]+)/)[2];
+            history.replaceState('','','/watch?' + match);
+            return;
+        }
+        return;
     }
-    if (! window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/[^?]+\?.*$/)) {
-        const matcher = window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/([^?]+)\?.*$/)[2];
-        history.replaceState('','','/channel/' + matcher);
+    /**
+     * Channel
+     */
+    if (window.location.href.match(/^https:\/\/www\.youtube\.com\/channel/)) {
+        if (window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/[^?]+\?.*$/)) {
+            match = window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/([^?]+)\?.*$/)[1];
+            history.replaceState('','','/channel/' + match);
+        }
+        if (window.location.href.match(/\/featured$/)) {
+            match = window.location.href.match(/^https:\/\/www\.youtube\.com\/channel\/([^/]+)/)[1];
+            history.replaceState('','','/channel/' + match);
+        }
     }
 }, 250);
