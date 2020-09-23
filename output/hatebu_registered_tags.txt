@@ -791,6 +791,7 @@ Web制作
 🎮Craftopia
 🎮Detroit Become Human
 🎮Fall Guys
+🎮Getting Over It
 🎮League of Legends
 🎮Minecraft
 🎮Ring Fit Adventure
@@ -802,6 +803,7 @@ Web制作
 🎮どうぶつの森
 🎮ぷよぷよ
 🎮アイドルマスター
+🎮アマガミ
 🎮カードゲーム
 🎮ゲーム
 🎮ゲーム実況動画
@@ -973,7 +975,7 @@ Web制作
 📓書評
 📓漫画
 📖朗読
-📚NIJISANJI Illustrations vol.1
+📚NIJISANJI Illustrations
 📚コンテナ物語
 📚知的生産の技術
 📣効果音
@@ -984,6 +986,7 @@ Web制作
 🔖APEX部2434キルリレー
 🔖ec騒動
 🔖いのちの輝き
+🔖にじさんじ甲子園
 🔖にじさんじ百鬼夜行
 🔖にじ鯖夏祭り2020
 🔖インド(にじさんじ)
@@ -998,7 +1001,7 @@ Web制作
 🔧工作動画
 🗣フリーチャット
 🗣ラジオ
-🗣雑談動画
+🗣雑談
 🛏睡眠導入動画
 🛒買い物
 🤣ネタ

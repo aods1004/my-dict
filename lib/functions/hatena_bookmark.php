@@ -139,7 +139,7 @@ function build_hatena_bookmark_comment($item)
 function count_helpful_tag(array $tags)
 {
     $count = 0;
-    $list = explode(",", "🍀,🚪,💬,🎨,✂");
+    $list = explode(",", "🍀,🚪,💬,🌐,🎨,✂");
     foreach ($tags as $tag) {
         if (! in_array(mb_substr($tag, 0, 1), $list)) {
             $count++;
@@ -191,7 +191,7 @@ function get_bookmark_api_client()
 function get_tag_exchanger() {
     $exchange = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
-        list($from, $to) = $row;
+        list($from, $to) = $row + ["", ""];
         $from = optimise_tag_text($from);
         $to = optimise_tag_text($to);
         $exchange[$from] = $to;
@@ -202,7 +202,7 @@ function get_tag_exchanger() {
     }
     $extractKeywords = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
-        list($from, $to) = $row;
+        list($from, $to, $excludeWords) = array_merge($row, [""]);
         if (!isset($row[1])) {
             exit;
         }
@@ -214,7 +214,7 @@ function get_tag_exchanger() {
             if (!isset($extractKeywords[$from])) {
                 $extractKeywords[$from] = [];
             }
-            $extractKeywords[$from][] = $to;
+            $extractKeywords[$from][] = ['to' => $to, 'exclude' => $excludeWords];
         }
     }
     $replace = [

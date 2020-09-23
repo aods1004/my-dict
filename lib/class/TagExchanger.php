@@ -46,12 +46,36 @@ class TagExchanger
         $title = $entry->getTitle();
         $url =  urldecode($entry->getUrl());
         $appendTags = [];
-        foreach ($this->extractKeywords as $from => $to) {
-            if (strpos($title, $from) !== false) {
-                $appendTags = array_merge($appendTags, $to);
-            }
-            if (strpos($url, $from) !== false && strlen($from) > 3) {
-                $appendTags = array_merge($appendTags, $to);
+        foreach ($this->extractKeywords as $from => $toItems) {
+            foreach ($toItems as $item) {
+                $to = $item['to'];
+                $exclude = $item['exclude'];
+                if (strpos($title, $from) !== false) {
+                    $exclude_flag = false;
+                    if ($exclude) {
+                        foreach (explode(',', $exclude) as $exclude_word) {
+                            if (strpos($title, $exclude_word) !== false) {
+                                $exclude_flag = true;
+                            }
+                        }
+                    }
+                    if (! $exclude_flag) {
+                        $appendTags[] = $to;
+                    }
+                }
+                if (strpos($url, $from) !== false) {
+                    $exclude_flag = false;
+                    if ($exclude) {
+                        foreach (explode(',', $exclude) as $exclude_word) {
+                            if (strpos($url, $exclude_word) !== false) {
+                                $exclude_flag = true;
+                            }
+                        }
+                    }
+                    if (! $exclude_flag) {
+                        $appendTags[] = $to;
+                    }
+                }
             }
         }
         $tags = array_values($tags);

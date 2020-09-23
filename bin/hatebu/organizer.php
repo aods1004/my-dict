@@ -82,6 +82,7 @@ foreach (get_all_bookmarks() as $bookmark) {
                 echo " RES  COMMENT: " . $resData['comment_raw'] . PHP_EOL;
             } else {
                 echo " UPDATED COMMENT: " . $comment . PHP_EOL;
+                echo " BEFORE  COMMENT: " . $initComment . PHP_EOL;
             }
         }
         foreach ($tags ?: [] as $tag) {
