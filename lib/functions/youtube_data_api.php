@@ -2,8 +2,6 @@
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-define('YOUTUBE_TSUKINO_MITO_CH_ID', "UCD-miitqNY3nyukJ4Fnf4_A");
-
 function get_youtube_client()
 {
     static $youtube;
@@ -71,3 +69,17 @@ function get_all_upload_videos_by_playlist_id($playlist_id, $channel_title = nul
     return $ret;
 }
 
+/**
+ *
+ * ----------------------------------------------------------------------------------------------
+ */
+
+function get_exclude_url() {
+    $ret = [];
+    foreach (load_tsv(ROOT_DIR . "/data/exclude_url.tsv") as $row) {
+        if (isset($row[0])) {
+            $ret[trim($row[0])] = true;
+        }
+    }
+    return $ret;
+}

@@ -223,3 +223,9 @@ function get_tag_exchanger() {
     return new TagExchanger($extractKeywords, $exchange, $replace, $exclude);
 }
 
+function get_hatebu_entry_url($url) {
+    return strtr($url, [
+        "https://" => "https://b.hatena.ne.jp/entry/s/",
+        "http://" => "https://b.hatena.ne.jp/entry/",
+        ]);
+}
