@@ -5,8 +5,9 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 use \Aods1004\MyDict\BookmarkApiClient;
 use \Aods1004\MyDict\UrlNormalizer;
 
+START:
 $tagExchanger = get_tag_exchanger();
-$bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client());
+$bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
 
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
@@ -72,10 +73,10 @@ foreach (get_all_bookmarks() as $bookmark) {
             echo " URL: {$url}" . PHP_EOL;
             echo " ***** タグの数が少ないです *****" . PHP_EOL;
         }
-        if ($initComment != $comment) {
+        if ($initComment != $comment && ! empty($comment)) {
             echo " URL: {$url}" . PHP_EOL;
             echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100) . PHP_EOL;
-            $resData = $bookmarkApiClient->post($url, $comment);
+            $resData = $bookmarkApiClient->put($url, $comment, $tags);
             if ($resData['comment_raw'] != $comment) {
                 echo " ***** FAILED TO UPDATE *****" . PHP_EOL;
                 echo " POST COMMENT: " . $comment . PHP_EOL;
@@ -108,14 +109,12 @@ foreach ($myTags['tags'] as $item) {
 $usedTags = array_keys($usedTagCount);
 sort($usedTags);
 sort($registeredTags);
-echo "  TOTAL TAG COUNT: " . $totalTagCount . PHP_EOL;
-echo "  TOTAL REGISTERED TAG COUNT : " . count($registeredTags) . PHP_EOL;
-echo "  TOTAL USED TAG COUNT: " . count($usedTagCount) . PHP_EOL;
 $timestamp = date('Y-m-d_Hi');
 file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.txt", implode(PHP_EOL, $usedTags));
 file_put_contents(ROOT_DIR . "/_logs/hatebu_diff_tags_{$timestamp}.txt", "" .
     implode(PHP_EOL, array_diff($registeredTags, $usedTags)) . PHP_EOL .
     "------------------------------------------------------------" . PHP_EOL .
     implode(PHP_EOL, array_diff($usedTags, $registeredTags)) . PHP_EOL);
-exit;
+
+goto START;
 

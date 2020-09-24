@@ -17,6 +17,7 @@
   },
   "require": {
     "ext-curl": "*",
+    "ext-pdo": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-simplexml": "*",

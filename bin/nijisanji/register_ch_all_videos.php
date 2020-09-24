@@ -5,19 +5,20 @@ use \Aods1004\MyDict\BookmarkEntry;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-$apiClient = get_bookmark_api_client();
-$itemFetcher = new BookmarkApiClient($apiClient);
-$tagExchanger = get_tag_exchanger();
-
-$channel_id = 'UC_a1ZYZ8ZTXpjg9xUY9sj8w'; // 鈴原るる
+$channel_id = 'UCtQvTSonGa0XiO6nHB63owQ';
+// キーワード抽出に説明欄を加えるか？
 $include_description_flag = false;
-
-// はてなに登録ずみのエントリーをスキップする
-$skip_registered_entry = true;
-
 // テストならはてなに投稿しない
 $test_flag = true; // true or false
+// はてなに登録ずみのエントリーをスキップする
+$skip_registered_entry = true; // true or false
+
 $list = get_all_upload_videos_by_channel_id($channel_id);
+
+START:
+echo "# START ########################################################" . PHP_EOL;
+$bookmarkClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
+$tagExchanger = get_tag_exchanger();
 $exclude_urls = get_exclude_url();
 
 $no = 0;
@@ -29,17 +30,13 @@ try {
         $title = $video['channel_title'] . " : " . $video['title'];
         $comment = '';
         $tags = [];
-
         if (isset($exclude_urls[$url]) && $skip_registered_entry) {
             continue;
         }
-
-        $item = $itemFetcher->fetch($url);
-
+        $item = $bookmarkClient->fetch($url);
         if (! empty($item) && $skip_registered_entry) {
             continue;
         }
-
         ob_start();
         $no++;
         echo "# No. {$no} #########################################################" . PHP_EOL;
@@ -80,22 +77,25 @@ try {
             echo " ***** 登録内容のテストです *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
-        $register_set[] = compact('url', 'comment');
+        $register_set[] = compact('url', 'comment', 'tags');
         OUTPUT_INFO:
-        echo " + {$url}" . PHP_EOL;
-        echo " + {$title}" . PHP_EOL;
-        echo " + " . $comment . PHP_EOL;
+        echo $url . PHP_EOL;
+        echo $title . PHP_EOL;
+        echo $comment . PHP_EOL;
         CLEAN_UP:
         echo PHP_EOL;
         $output[] = ob_get_flush();
     }
     echo "# POST TO HATEBU ###############################################" . PHP_EOL;
     foreach ($register_set as $item) {
-        $apiClient->post("my/bookmark",
-            ["form_params" => ["url" => $item['url'], "comment" => $item['comment']]]);
+        $bookmarkClient->put($item['url'], $item['comment'], $item['tags']);
     }
 } catch (Throwable $exception) {
     var_dump($exception);
 }
 $output = array_reverse($output);
 file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));
+
+if ($test_flag) {
+    goto START;
+}
