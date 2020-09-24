@@ -12,16 +12,22 @@ $tagExchanger = get_tag_exchanger();
  */
 $output = [];
 $input_dict = [];
-foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
-    list($url, $title,) = $row;
-    preg_match("/^([^\(]*)(\(.*)? [|(]/", $title, $match);
-    if (empty($name_ruby_dict[$match[1]])) {
-        echo "not found: " . $match[1];
-        exit;
+foreach (load_tsv(ROOT_DIR . "/data/input.tsv") as $row) {
+    list($ruby, $url,) = $row;
+    if (empty(trim($url))) {
+        continue;
     }
-    $name = $match[1];
-    $ruby = $name_ruby_dict[$name];
-    $input_dict[$ruby] = "$ruby\t" . $url;
+    $url = str_replace("https://twitter.com/", "https://twpf.jp/", $url);
+    $url = strtolower($url);
+    $output[] = "$url\t".$ruby_tag_dict[$ruby].",🌐ツイフィール";
+//    preg_match("/^([^\(]*)(\(.*)? [|(]/", $title, $match);
+//    if (empty($name_ruby_dict[$match[1]])) {
+//        echo "not found: " . $match[1];
+//        exit;
+//    }
+//    $name = $match[1];
+//    $ruby = $name_ruby_dict[$name];
+//    $input_dict[$ruby] = $url;
 //    $tag = $tags_dict[$ruby];
 //    if (trim($url)) {
 //        $input_dict[$ruby] = "$url\t$tag,🗣フリーチャット";
@@ -39,12 +45,12 @@ foreach (load_tsv(__DIR__ . "/data/input.tsv") as $row) {
 //    $input_dict[$ruby] = "$ruby\t" . str_replace("https://", "https://b.hatena.ne.jp/entry/s/", $url);
 }
 if ($output) {
-    file_put_contents(__DIR__ . "/data/output.tsv", implode(PHP_EOL, $output));
+    file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));
     exit;
 }
 
 $output = [];
-foreach (load_tsv(__DIR__ . "/data_raw/name.tsv") as $row) {
+foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
     list($ruby, $name) = $row;
     if (! empty($input_dict[$ruby])) {
         $output[] = $input_dict[$ruby];

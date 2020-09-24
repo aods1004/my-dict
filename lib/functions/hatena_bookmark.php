@@ -65,22 +65,52 @@ function get_all_bookmarks($useOfflineRss = false)
 function tag_compare($a, $b)
 {
     // 先頭に置く
-    $ret = pattern_up_compare(["🔖"], $a, $b);
-    if (! is_null($ret)) {
+    $ret = pattern_up_compare(["🔖","🌈👥"], $a, $b);
+    if (!is_null($ret)) {
         return $ret;
     }
+
+    // 先頭に置く
+    $ret = pattern_fav_tags($a, $b);
+    if (!is_null($ret)) {
+        return $ret;
+    }
+
     // 後ろに下げる
     $ret = pattern_down_compare(
-        explode(",",
-            "🍀,🚪,🌐,💿,💬,🛒,🎨,✂,➕,📋,📓,📚,☕,💪,🍴,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
+        explode(",", "".
+            "🍀,🚪,🌐,🗣,💿,💬,🛒,🎨,✂,➕,📋,📓,📚," .
+            "☕,💪,🍴,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
         $a, $b);
-    if (! is_null($ret)) {
+    if (!is_null($ret)) {
         return $ret;
     }
     $personEmoji = ["🌈", "⚓", "🎥", "🎤", "👥", "🀄"];
     $a = strtr($a, array_combine($personEmoji, array_pad([], count($personEmoji), "")));
     $b = strtr($b, array_combine($personEmoji, array_pad([], count($personEmoji), "")));
     return ($a > $b) ? 0 : 1;
+}
+
+function pattern_fav_tags($a, $b)
+{
+    static $favTags;
+    if (empty($favTags)) {
+        foreach (file(ROOT_DIR . "/data/hatebu_fav_tags.tsv") as $i => $tag) {
+            $favTags[trim($tag)] = $i;
+        }
+    }
+    $ia = isset($favTags[$a]);
+    $ib = isset($favTags[$b]);
+    if ($ia && !$ib) {
+        return 0;
+    }
+    if (!$ia && $ib) {
+        return 1;
+    }
+    if ($ia && $ib) {
+        return ($favTags[$a] < $favTags[$b]) ? 0 : 1;
+    }
+    return null;
 }
 
 function pattern_up_compare($chars, $a, $b)
@@ -98,6 +128,7 @@ function pattern_up_compare($chars, $a, $b)
     }
     return null;
 }
+
 function pattern_down_compare($chars, $a, $b)
 {
     foreach ($chars as $char) {
@@ -141,7 +172,7 @@ function count_helpful_tag(array $tags)
     $count = 0;
     $list = explode(",", "🍀,🚪,💬,🌐,🎨,✂");
     foreach ($tags as $tag) {
-        if (! in_array(mb_substr($tag, 0, 1), $list)) {
+        if (!in_array(mb_substr($tag, 0, 1), $list)) {
             $count++;
         }
     }
@@ -188,7 +219,8 @@ function get_bookmark_api_client()
     ]);
 }
 
-function get_tag_exchanger() {
+function get_tag_exchanger()
+{
     $exchange = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
         list($from, $to) = $row + ["", ""];
@@ -214,7 +246,10 @@ function get_tag_exchanger() {
             if (!isset($extractKeywords[$from])) {
                 $extractKeywords[$from] = [];
             }
-            $extractKeywords[$from][] = ['to' => $to, 'exclude' => $excludeWords];
+            $extractKeywords[$from][] = [
+                'to' => optimise_tag_text($to),
+                'exclude' => array_filter(explode(',', $excludeWords))
+            ];
         }
     }
     $replace = [
@@ -223,9 +258,10 @@ function get_tag_exchanger() {
     return new TagExchanger($extractKeywords, $exchange, $replace, $exclude);
 }
 
-function get_hatebu_entry_url($url) {
+function get_hatebu_entry_url($url)
+{
     return strtr($url, [
         "https://" => "https://b.hatena.ne.jp/entry/s/",
         "http://" => "https://b.hatena.ne.jp/entry/",
-        ]);
+    ]);
 }

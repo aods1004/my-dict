@@ -39,6 +39,32 @@ function get_all_upload_videos_by_channel_id($channel_id) {
 }
 
 /**
+ * @param $channel_id
+ * @return array
+ */
+function get_all_search_result($keyword) {
+
+    $youtube = get_youtube_client();
+    $part = 'id,snippet,contentDetails';
+    $response = $youtube->search->listSearch($part, ['id' => $channel_id]);
+    $channel_title = '';
+    $upload_list_id = null;
+    foreach($response->getItems() as $item) {
+        $upload_list_id =
+            $item->getContentDetails()
+                ->getRelatedPlaylists()
+                ->getUploads();
+        $channel_title =
+            $item->getSnippet()->getTitle();
+    }
+    if (empty($upload_list_id)) {
+        return [];
+    }
+    return get_all_upload_videos_by_playlist_id($upload_list_id, $channel_title);
+}
+
+
+/**
  * @param $playlist_id
  * @param null $channel_title
  * @return array

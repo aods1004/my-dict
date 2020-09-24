@@ -43,36 +43,17 @@ class TagExchanger
      */
     public function extractKeywords($tags, BookmarkEntry $entry)
     {
-        $title = $entry->getTitle();
-        $url =  urldecode($entry->getUrl());
+        $haystack = $entry->getTitle() . " " . urldecode($entry->getUrl());
         $appendTags = [];
         foreach ($this->extractKeywords as $from => $toItems) {
             foreach ($toItems as $item) {
                 $to = $item['to'];
-                $exclude = $item['exclude'];
-                if (strpos($title, $from) !== false) {
-                    $exclude_flag = false;
-                    if ($exclude) {
-                        foreach (explode(',', $exclude) as $exclude_word) {
-                            if (strpos($title, $exclude_word) !== false) {
-                                $exclude_flag = true;
-                            }
-                        }
-                    }
-                    if (! $exclude_flag) {
-                        $appendTags[] = $to;
-                    }
-                }
-                if (strpos($url, $from) !== false) {
-                    $exclude_flag = false;
-                    if ($exclude) {
-                        foreach (explode(',', $exclude) as $exclude_word) {
-                            if (strpos($url, $exclude_word) !== false) {
-                                $exclude_flag = true;
-                            }
-                        }
-                    }
-                    if (! $exclude_flag) {
+                if ($this->checkIncludeWord($haystack, $from)) {
+                    if ($this->checkExcludeWord($haystack, $item['exclude'])) {
+                        $tags = array_filter($tags, function ($value) use ($to) {
+                            return ($value != $to);
+                        });
+                    } else {
                         $appendTags[] = $to;
                     }
                 }
@@ -82,6 +63,39 @@ class TagExchanger
         $appendTags = array_values($appendTags);
         $ret = array_unique(array_merge($tags, $appendTags));
         return $ret;
+    }
+
+    /**
+     * @param $haystack
+     * @param $wordStr
+     * @return bool
+     */
+    private function checkIncludeWord($haystack, $wordStr)
+    {
+        $words = array_filter(explode(',', $wordStr));
+        $count = count($words);
+        $result = 0;
+        if ($count) {
+            foreach ($words as $word) {
+                if (strpos($haystack, $word) !== false) {
+                    $result += 1;
+                }
+            }
+        }
+        return ($result > 0 && $count == $result);
+    }
+
+    private function checkExcludeWord($haystack, array $exclude)
+    {
+        $flag = false;
+        if ($exclude) {
+            foreach ($exclude as $exclude_word) {
+                if (strpos($haystack, $exclude_word) !== false) {
+                    $flag = true;
+                }
+            }
+        }
+        return $flag;
     }
 
     /**
