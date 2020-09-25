@@ -9,7 +9,7 @@ $channel_id = 'UCkIimWZ9gBJRamKF0rmPU8w';  //天宮こころ
 // キーワード抽出に説明欄を加えるか？
 $include_description_flag = false;
 // テストならはてなに投稿しない
-$preparation_flag = true; // true or false
+$preparation_flag = false; // true or false
 // はてなに登録ずみのエントリーをスキップする
 $skip_registered_entry = true; // true or false
 
