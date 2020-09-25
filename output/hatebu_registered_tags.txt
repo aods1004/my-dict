@@ -65,10 +65,8 @@ Web制作
 クラウドソーシング
 ケーブル
 コミケ
-スポーツ
 ソフトウェア
 デザイン
-デバイス
 バーチャルYouTuber
 フォント
 ブログ運営
@@ -799,6 +797,7 @@ Web制作
 🎮DbD
 🎮Detroit Become Human
 🎮Fall Guys
+🎮Final Fantasy 14
 🎮Getting Over It
 🎮League of Legends
 🎮Minecraft
@@ -809,6 +808,7 @@ Web制作
 🎮Splatoon
 🎮Terraria
 🎮Undertale
+🎮eスポーツ
 🎮おえかきの森
 🎮どうぶつの森
 🎮ぷよぷよ
@@ -850,6 +850,7 @@ Web制作
 🎮千年戦争アイギス
 🎮天鳳
 🎮星のカービィ
+🎮桃鉄
 🎮艦これ
 🎮雀魂
 🎮雪山人狼
@@ -968,6 +969,10 @@ Web制作
 💭雛芽るち
 💭鳩岡小恋
 💰お金
+💻まうす
+💻キーボード
+💻キーボード・マウス
+💻デバイス
 💼DX
 💼Excel
 💼GTD
@@ -1027,6 +1032,7 @@ Web制作
 🔖書籍の電子化
 🔖知的生産の技術
 🔖艦これ攻略情報
+🔖🌈いちから中央銀行
 🔖🌈にじFes2021
 🔖🌈にじさんじ甲子園
 🔖🌈にじ鯖Ark

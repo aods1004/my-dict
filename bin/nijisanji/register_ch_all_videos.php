@@ -5,11 +5,11 @@ use \Aods1004\MyDict\BookmarkEntry;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-$channel_id = 'UCtQvTSonGa0XiO6nHB63owQ';
+$channel_id = 'UCkIimWZ9gBJRamKF0rmPU8w';  //天宮こころ
 // キーワード抽出に説明欄を加えるか？
 $include_description_flag = false;
 // テストならはてなに投稿しない
-$test_flag = true; // true or false
+$preparation_flag = true; // true or false
 // はてなに登録ずみのエントリーをスキップする
 $skip_registered_entry = true; // true or false
 
@@ -73,7 +73,7 @@ try {
             echo " ***** タグが少ないです *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
-        if ($test_flag) {
+        if ($preparation_flag) {
             echo " ***** 登録内容のテストです *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
@@ -96,6 +96,6 @@ try {
 $output = array_reverse($output);
 file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));
 
-if ($test_flag) {
+if ($preparation_flag) {
     goto START;
 }
