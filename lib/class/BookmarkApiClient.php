@@ -72,7 +72,7 @@ class BookmarkApiClient
      */
     public function put($url, $comment, $tags)
     {
-        if (! $this->exist($url, $comment, $tags)) {
+        if (! $this->beNotChange($url, $comment, $tags)) {
             $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
             $this->updateDatabase($url, $tags, $comment);
             return json_decode($res->getBody()->getContents(), true);
@@ -102,7 +102,7 @@ class BookmarkApiClient
      * @param $tags
      * @return bool
      */
-    public function exist($url, $comment, $tags)
+    public function beNotChange($url, $comment, $tags)
     {
         if($this->pdo) {
             $st = $this->pdo->prepare("select 1 from bookmark where url = :url and tags = :tags and comment_raw = :comment_raw;");
@@ -117,7 +117,23 @@ class BookmarkApiClient
         }
         return false;
     }
-
+    /**
+     * @param $url
+     * @return bool
+     */
+    public function exist($url)
+    {
+        if($this->pdo) {
+            $st = $this->pdo->prepare("select 1 from bookmark where url = :url;");
+            $st->bindValue(":url", $url);
+            $st->execute();
+            $data = $st->fetchAll();
+            if (! empty($data)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * @param $url

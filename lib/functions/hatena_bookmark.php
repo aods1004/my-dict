@@ -148,8 +148,8 @@ function pattern_down_compare($chars, $a, $b)
 
 function build_hatena_bookmark_comment($item)
 {
-    $item['comment'] = isset($item['comment']) ? $item['comment'] : "";
-    $item["created_epoch"] = isset($item['created_epoch']) ? $item['created_epoch'] : time();
+    $item['comment'] = !empty($item['comment']) ? $item['comment'] : "";
+    $item["created_epoch"] = !empty($item['created_epoch']) ? $item['created_epoch'] : time();
     $item['tags'] = !empty($item['tags']) ? $item['tags'] : [];
     $tags = [];
     foreach ($item['tags'] as $i => $tag) {
@@ -159,9 +159,8 @@ function build_hatena_bookmark_comment($item)
     usort($tags, 'tag_compare');
     // $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
     $tags = array_slice($tags, 0, 10);
-    if (!preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $item['comment'])) {
-        $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
-    }
+    $item['comment'] = preg_replace("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", '', $item['comment']);
+    $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
 
     return [$tag_text . $item['comment'], $tags];
@@ -224,6 +223,9 @@ function get_tag_exchanger()
     $exchange = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
         list($from, $to) = $row + ["", ""];
+        if (empty($from) || empty($to)) {
+            continue;
+        }
         $from = optimise_tag_text($from);
         $to = optimise_tag_text($to);
         $exchange[$from] = $to;
@@ -234,14 +236,12 @@ function get_tag_exchanger()
     }
     $extractKeywords = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
-        list($from, $to, $excludeWords) = array_merge($row, [""]);
-        if (!isset($row[1])) {
-            exit;
+        list($from, $to, $excludeWords) = $row + ["", "", ""];
+        if (empty($from) || empty($to)) {
+            continue;
         }
         $fromList = [$from];
         $fromList[] = str_replace(" ", "", $from);
-        $fromList[] = strtolower($from);
-        $fromList[] = strtoupper($from);
         foreach (array_unique($fromList) as $from) {
             if (!isset($extractKeywords[$from])) {
                 $extractKeywords[$from] = [];
@@ -258,6 +258,10 @@ function get_tag_exchanger()
     return new TagExchanger($extractKeywords, $exchange, $replace, $exclude);
 }
 
+/**
+ * @param $url
+ * @return string
+ */
 function get_hatebu_entry_url($url)
 {
     return strtr($url, [
