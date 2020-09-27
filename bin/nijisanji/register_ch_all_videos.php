@@ -5,14 +5,14 @@ use \Aods1004\MyDict\BookmarkEntry;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-$channel_id = 'UCl1oLKcAq93p-pwKfDGhiYQ';
-// キーワード抽出に説明欄を加えるか？
-$include_description_flag = false;
+$channel_id = 'UCtAvQ5U0aXyKwm2i4GqFgJg';
+
 // テストならはてなに投稿しない
-$preparation_flag = true; // true or false
+$preparation_flag = false; // true or false
 // はてなに登録ずみのエントリーをスキップする
 $skip_registered_entry_flag = true; // true or false
-
+// キーワード抽出に説明欄を加えるか？
+$include_description_flag = true;
 $list = get_all_upload_videos_by_channel_id($channel_id);
 
 START:
@@ -27,47 +27,47 @@ try {
     foreach (get_all_bookmarks() as $bookmark) {
         if ($count > 5) break;
         $bookmarkClient->fetch($bookmark['url']);
-        $count ++;
+        $count++;
     }
     foreach (array_reverse($list) as $video) {
         $url = $video['url'];
-        $title = $video['channel_title'] . " : " . $video['title'];
-        $comment = '';
-        $tags = [];
+        $title = $video['channel_title'] . PHP_EOL . $video['title'];
+        $published_at = '🎦' . date("Y/m/d H:i", $video['published_at']);
+        $bookmark = [];
         $registered_flag = $bookmarkClient->exist($url);
-        if ($skip_registered_entry_flag && $registered_flag) {
-            continue;
+        if ($registered_flag) {
+            if ($skip_registered_entry_flag) continue;
+            $bookmark = $bookmarkClient->fetch($url);
         }
-        if (check_exclude_url($url)) {
-            continue;
+        list($comment, $created_epoch, $tags) = extract_bookmark($bookmark);
+
+        if (! preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
+            $comment = $published_at . " " . $comment;
         }
+
+        $extract_base = $title . ($include_description_flag ? $video['description'] : $title);
+        if (check_exclude_url($url)) continue;
         ob_start();
         $no++;
         echo "# No. {$no} #########################################################" . PHP_EOL;
         echo " + " . get_hatebu_entry_url($url) . PHP_EOL;
-        // 抽出用文章を生成
-        $extract_base = $title . ($include_description_flag ? $video['description'] : $title);
-        // コメント
-        $bookmark = $registered_flag ? $bookmarkClient->fetch($url) : [];
-        $comment = isset($set['comment']) ? $bookmark['comment'] : '';
-        $created_epoch = isset($set['created_epoch']) ? $bookmark['created_epoch'] : null;
-        $tags = isset($bookmark['tags']) ? $bookmark['tags'] : [];
+
         // タグの生成
         $tags = create_tags($url, $extract_base, $tags);
-        if (! check_over_tag_limit($tags)) {
+        if (!check_over_tag_limit($tags)) {
             usort($tags, 'tag_compare');
-            $comment = "[".implode("][", $tags)."]";
+            $comment = "[" . implode("][", $tags) . "]";
             goto OUTPUT_INFO;
         }
         // 投稿内容の組み立て
         list($comment, $tags) = build_hatena_bookmark_comment(compact('tags', 'comment', 'created_epoch'));
         // 更新する事項があるか？
-        if ($bookmarkClient->beNotChange($url, $comment, $tags)) {
+        if ($bookmarkClient->beNotChange($url, $tags)) {
             echo " ***** Bookmarkは更新されていません *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
         // タグが最低限設定されているか？
-        if (! check_fulfill_tag_count_condition($tags)) {
+        if (!check_fulfill_tag_count_condition($tags)) {
             goto OUTPUT_INFO;
         }
         // 準備フラグがたっていれば、登録をスキップ
@@ -99,7 +99,15 @@ if ($preparation_flag) {
 }
 exit;
 
-function check_exclude_url($url) {
+function extract_bookmark($bookmark) {
+    $comment = isset($set['comment']) ? $bookmark['comment'] : '';
+    $created_epoch = isset($set['created_epoch']) ? $bookmark['created_epoch'] : null;
+    $tags = isset($bookmark['tags']) ? $bookmark['tags'] : [];
+    return [$comment, $created_epoch, $tags];
+}
+
+function check_exclude_url($url)
+{
     $exclude_urls = get_exclude_url();
     if (isset($exclude_urls[$url])) {
         echo " ***** URLがスキップ対象です *****" . PHP_EOL;
@@ -108,16 +116,19 @@ function check_exclude_url($url) {
     return false;
 }
 
-function create_tags($url, $title, $tags) {
+function create_tags($url, $title, $tags)
+{
     static $tagExchanger, $ltvCount = 100;
     if (empty($tagExchanger) || $ltvCount < 1) {
         $tagExchanger = get_tag_exchanger();
         $ltvCount = 100;
     }
     $ltvCount--;
-    $tags =  $tagExchanger->extractKeywords($tags, new BookmarkEntry(compact('url', 'title')));
+    $tags = $tagExchanger->extractKeywords($tags, new BookmarkEntry(compact('url', 'title')));
     $tags = $tagExchanger->exchange($tags);
-    return $tagExchanger->optimise($tags);
+    $tags = $tagExchanger->optimise($tags);
+    $tags = $tagExchanger->removeRedundant($tags);
+    return $tags;
 }
 
 function check_over_tag_limit($tags)
@@ -149,6 +160,7 @@ function output_info($url, $title, $comment)
     echo $comment . PHP_EOL;
 }
 
-function clean_up() {
+function clean_up()
+{
     echo PHP_EOL;
 }

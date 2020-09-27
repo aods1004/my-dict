@@ -42,7 +42,7 @@ function get_all_upload_videos_by_channel_id($channel_id) {
  * @param $channel_id
  * @return array
  */
-function get_all_search_result($keyword) {
+function get_all_search_result($channel_id) {
 
     $youtube = get_youtube_client();
     $part = 'id,snippet,contentDetails';
@@ -84,8 +84,15 @@ function get_all_upload_videos_by_playlist_id($playlist_id, $channel_title = nul
             $title = $item->getSnippet()->getTitle();
             $description = $item->getSnippet()->getDescription();
             $id = $item->getContentDetails()->getVideoId();
+
+            $videoResponse = $youtube->videos->listVideos('snippet', array_filter([
+                'id' => $id,
+            ]));
+            foreach ($videoResponse->getItems() as $video) {
+                $published_at = strtotime($video->getSnippet()->getPublishedAt());
+            }
             $url = "https://www.youtube.com/watch?v=" . $id;
-            $ret[] = compact('url', 'id', 'title', 'channel_title', 'description');
+            $ret[] = compact('url', 'id', 'title', 'channel_title', 'description', 'published_at');
         };
         $pageToken = $response->getNextPageToken() ?: null;
         if (! $pageToken) {

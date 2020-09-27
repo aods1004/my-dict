@@ -20,20 +20,25 @@ class TagExchanger
      * @var array
      */
     private $replace = [];
-
+    /**
+     * @var array
+     */
+    private $redundant = [];
     /**
      * TagExchanger constructor.
      * @param array $extractKeywords
      * @param array $exchange
      * @param array $replace
      * @param array $exclude
+     * @param array $redundant
      */
-    public function __construct(array $extractKeywords, array $exchange, array $replace, array $exclude)
+    public function __construct(array $extractKeywords, array $exchange, array $replace, array $exclude, array $redundant)
     {
         $this->extractKeywords = $extractKeywords;
         $this->exchange = $exchange;
         $this->exclude = $exclude;
         $this->replace = $replace;
+        $this->redundant = $redundant;
     }
 
     /**
@@ -134,5 +139,18 @@ class TagExchanger
             $tags[$key] = optimise_tag_text($tag);
         }
         return $tags;
+    }
+
+    public function removeRedundant(array $tags)
+    {
+        $unnecessaries = [];
+        foreach ($this->redundant as $item) {
+            $necessary = trim($item['necessary']);
+            $unnecessary = trim($item['unnecessary']);
+            if (in_array($necessary, $tags) && in_array($unnecessary, $tags)) {
+                $unnecessaries[] = $unnecessary;
+            }
+        }
+        return array_values(array_diff($tags, $unnecessaries));
     }
 }

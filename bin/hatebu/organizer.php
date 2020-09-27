@@ -12,18 +12,11 @@ $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DS
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
 $usedTagCount = [];
-foreach (get_all_bookmarks() as $bookmark) {
+foreach (get_all_bookmarks() as $item) {
     echo "***** [$totalBookmarkCount] ****************************************************" . PHP_EOL;
     try {
-        $url = $bookmark['url'];
-        $initUrl = $bookmark['url'];
-        // データ取得
-        $item = $bookmarkApiClient->fetch($url, $bookmark['tags']);
-        if (empty($item)) {
-            echo " ##### FAIL TO FETCH ITEM #####" . PHP_EOL;
-            echo " * URL: {$url}" . PHP_EOL;
-            continue;
-        }
+        $url = $initUrl = $item['url'];
+        $bookmarkApiClient->updateDatabase($url, $item['tags'], $item['comment_raw']);
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         // エントリーデータの取得・判定
         $entry = $bookmarkApiClient->fetchEntry($url);
@@ -34,10 +27,9 @@ foreach (get_all_bookmarks() as $bookmark) {
         }
         // URLの置き換え
         $url = $entry->takeOverUrl($url);
-        // エントリーからのデータ取得処理
         $item['tags'] = $tagExchanger->extractKeywords($item['tags'], $entry);
-        // タグ変換処理
         $item['tags'] = $tagExchanger->exchange($item['tags']);
+        $item['tags'] = $tagExchanger->removeRedundant($item['tags']);
         // Twitter処理
         if (UrlNormalizer::isTwitterUrl($url)) {
             $url = UrlNormalizer::normalizeTwitterUrl($url);
@@ -76,15 +68,9 @@ foreach (get_all_bookmarks() as $bookmark) {
         if ($initComment != $comment && ! empty($comment)) {
             echo " URL: {$url}" . PHP_EOL;
             echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100) . PHP_EOL;
-            $resData = $bookmarkApiClient->put($url, $comment, $tags);
-            if ($resData['comment_raw'] != $comment) {
-                echo " ***** FAILED TO UPDATE *****" . PHP_EOL;
-                echo " POST COMMENT: " . $comment . PHP_EOL;
-                echo " RES  COMMENT: " . $resData['comment_raw'] . PHP_EOL;
-            } else {
-                echo " UPDATED COMMENT: " . $comment . PHP_EOL;
-                echo " BEFORE  COMMENT: " . $initComment . PHP_EOL;
-            }
+            $bookmarkApiClient->put($url, $comment, $tags);
+            echo " UPDATED COMMENT: " . $comment . PHP_EOL;
+            echo " BEFORE  COMMENT: " . $initComment . PHP_EOL;
         }
         foreach ($tags ?: [] as $tag) {
             $usedTagCount[$tag] = (empty($usedTagCount[$tag])) ? 1 : ($usedTagCount[$tag] + 1);

@@ -25,10 +25,17 @@ function get_all_bookmarks($useOfflineRss = false)
             foreach ($subjects as $tag) {
                 $tags[] = (string)$tag;
             }
+            list($comment, $tags) = build_hatena_bookmark_comment([
+                'tags' => $tags,
+                'comment' => strval($item->description),
+                'created_epoch' => strtotime(strval($item->date)),
+            ]);
             yield [
                 'url' => strval($item->link),
                 'title' => strval($item->title),
-                'tags' => $tags
+                'tags' => $tags,
+                'comment_raw' => $comment,
+                'comment' => strval($item->description),
             ];
         }
     } else {
@@ -52,10 +59,17 @@ function get_all_bookmarks($useOfflineRss = false)
                 foreach ($item->children($ns["dc"])->subject ?: [] as $tag) {
                     $tags[] = $tag;
                 }
+                list($comment, $tags) = build_hatena_bookmark_comment([
+                    'tags' => $tags,
+                    'comment' => strval($item->description),
+                    'created_epoch' => strtotime(strval($item->date)),
+                ]);
                 yield [
                     'url' => strval($item->link),
                     'title' => strval($item->title),
-                    'tags' => $tags
+                    'tags' => $tags,
+                    'comment_raw' => $comment,
+                    'comment' => strval($item->description),
                 ];
             }
         }
@@ -159,8 +173,9 @@ function build_hatena_bookmark_comment($item)
     usort($tags, 'tag_compare');
     // $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
     $tags = array_slice($tags, 0, 10);
-    $item['comment'] = preg_replace("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", '', $item['comment']);
-    $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
+    if (! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $item['comment'])) {
+        $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
+    }
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
 
     return [$tag_text . $item['comment'], $tags];
@@ -234,6 +249,13 @@ function get_tag_exchanger()
     foreach (load_tsv(ROOT_DIR . "/data/tags_unnecessary.tsv") as $row) {
         $exclude[] = $row[0];
     }
+    $redundant = [];
+    foreach (load_tsv(ROOT_DIR . "/data/tags_redundant.tsv") as $row) {
+        list($necessary, $unnecessary) = $row + ["", ""];
+        if (empty($necessary) || empty($unnecessary)) continue;
+        $redundant[] = compact('necessary', 'unnecessary');
+    }
+
     $extractKeywords = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
         list($from, $to, $excludeWords) = $row + ["", "", ""];
@@ -255,7 +277,7 @@ function get_tag_exchanger()
     $replace = [
         "📽" => "🎥",
     ];
-    return new TagExchanger($extractKeywords, $exchange, $replace, $exclude);
+    return new TagExchanger($extractKeywords, $exchange, $replace, $exclude, $redundant);
 }
 
 /**
