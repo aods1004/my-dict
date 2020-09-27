@@ -6,7 +6,6 @@ use \Aods1004\MyDict\BookmarkApiClient;
 use \Aods1004\MyDict\UrlNormalizer;
 
 START:
-$tagExchanger = get_tag_exchanger();
 $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
 
 $totalTagCount = 0;
@@ -18,18 +17,17 @@ foreach (get_all_bookmarks() as $item) {
         $url = $initUrl = $item['url'];
         $bookmarkApiClient->updateDatabase($url, $item['tags'], $item['comment_raw']);
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
+        $title = isset($item['title']) ? $item['title'] : "";
         // エントリーデータの取得・判定
-        $entry = $bookmarkApiClient->fetchEntry($url);
-        if (empty($entry)) {
-            echo " ##### FAIL TO FETCH ENTRY #####" . PHP_EOL;
-            echo " * URL: {$url}" . PHP_EOL;
-            continue;
-        }
-        // URLの置き換え
-        $url = $entry->takeOverUrl($url);
-        $item['tags'] = $tagExchanger->extractKeywords($item['tags'], $entry);
-        $item['tags'] = $tagExchanger->exchange($item['tags']);
-        $item['tags'] = $tagExchanger->removeRedundant($item['tags']);
+//        $entry = $bookmarkApiClient->fetchEntry($url);
+//        if (empty($entry)) {
+//            echo " ##### FAIL TO FETCH ENTRY #####" . PHP_EOL;
+//            echo " * URL: {$url}" . PHP_EOL;
+//            continue;
+//        }
+//        // URLの置き換え
+//        $url = $entry->takeOverUrl($url);
+        $item['tags'] = create_tags($item['url'], $item['title'], $item['tags']);
         // Twitter処理
         if (UrlNormalizer::isTwitterUrl($url)) {
             $url = UrlNormalizer::normalizeTwitterUrl($url);
@@ -67,7 +65,7 @@ foreach (get_all_bookmarks() as $item) {
         }
         if ($initComment != $comment && ! empty($comment)) {
             echo " URL: {$url}" . PHP_EOL;
-            echo " TITLE: " . mb_substr($entry->getTitle(), 0, 100) . PHP_EOL;
+            echo " TITLE: " . mb_substr($title, 0, 100) . PHP_EOL;
             $bookmarkApiClient->put($url, $comment, $tags);
             echo " UPDATED COMMENT: " . $comment . PHP_EOL;
             echo " BEFORE  COMMENT: " . $initComment . PHP_EOL;

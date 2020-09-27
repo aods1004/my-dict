@@ -43,12 +43,13 @@ class TagExchanger
 
     /**
      * @param $tags
-     * @param BookmarkEntry $entry
+     * @param $title
+     * @param $url
      * @return array
      */
-    public function extractKeywords($tags, BookmarkEntry $entry)
+    public function extractKeywords($tags, $title, $url)
     {
-        $haystack = $entry->getTitle() . " " . urldecode($entry->getUrl());
+        $haystack = $title . " " . urldecode($url);
         $appendTags = [];
         foreach ($this->extractKeywords as $from => $toItems) {
             foreach ($toItems as $item) {

@@ -5,7 +5,7 @@ use \Aods1004\MyDict\BookmarkEntry;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-$channel_id = 'UCtAvQ5U0aXyKwm2i4GqFgJg';
+$channel_id = 'UCmovZ2th3Sqpd00F5RdeigQ';
 
 // テストならはてなに投稿しない
 $preparation_flag = false; // true or false
@@ -114,21 +114,6 @@ function check_exclude_url($url)
         return true;
     }
     return false;
-}
-
-function create_tags($url, $title, $tags)
-{
-    static $tagExchanger, $ltvCount = 100;
-    if (empty($tagExchanger) || $ltvCount < 1) {
-        $tagExchanger = get_tag_exchanger();
-        $ltvCount = 100;
-    }
-    $ltvCount--;
-    $tags = $tagExchanger->extractKeywords($tags, new BookmarkEntry(compact('url', 'title')));
-    $tags = $tagExchanger->exchange($tags);
-    $tags = $tagExchanger->optimise($tags);
-    $tags = $tagExchanger->removeRedundant($tags);
-    return $tags;
 }
 
 function check_over_tag_limit($tags)

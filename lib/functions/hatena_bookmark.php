@@ -280,6 +280,21 @@ function get_tag_exchanger()
     return new TagExchanger($extractKeywords, $exchange, $replace, $exclude, $redundant);
 }
 
+function create_tags($url, $title, $tags)
+{
+    static $tagExchanger, $ltvCount = 100;
+    if (empty($tagExchanger) || $ltvCount < 1) {
+        $tagExchanger = get_tag_exchanger();
+        $ltvCount = 100;
+    }
+    $ltvCount--;
+    $tags = $tagExchanger->extractKeywords($tags, $title, $url);
+    $tags = $tagExchanger->exchange($tags);
+    $tags = $tagExchanger->optimise($tags);
+    $tags = $tagExchanger->removeRedundant($tags);
+    return $tags;
+}
+
 /**
  * @param $url
  * @return string
