@@ -12,8 +12,8 @@ $preparation_flag = true; // true or false
 $skip_registered_entry_flag = true; // true or false
 // キーワード抽出に説明欄を加えるか？
 $include_description_flag = false;
-$list = get_all_upload_videos_by_channel_id($channel_id);
-// $list = get_all_upload_videos_by_channel_ids(get_youtube_channel_ids());
+// $list = get_all_upload_videos_by_channel_id($channel_id);
+$list = get_all_upload_videos_by_channel_ids(get_youtube_channel_ids());
 
 START:
 echo "# START ########################################################" . PHP_EOL;
@@ -97,10 +97,11 @@ if ($preparation_flag) {
 }
 exit;
 
-function extract_bookmark($bookmark) {
-    $comment = isset($bookmark['comment']) ? $bookmark['comment'] : '';
-    $created_epoch = isset($bookmark['created_epoch']) ? $bookmark['created_epoch'] : null;
-    $tags = isset($bookmark['tags']) ? $bookmark['tags'] : [];
+function extract_bookmark($bookmark)
+{
+    $comment = _elm($bookmark, 'comment','');
+    $created_epoch = _elm($bookmark, 'created_epoch');
+    $tags = _elm($bookmark, 'tags', []);
     return [$comment, $created_epoch, $tags];
 }
 

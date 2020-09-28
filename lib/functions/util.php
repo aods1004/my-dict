@@ -52,3 +52,8 @@ function check_url_status($url)
         return null;
     }
 }
+
+function _elm($data, $key, $default = null)
+{
+    return isset($data[$key]) ? $data[$key] : $default;
+}

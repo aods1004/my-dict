@@ -18,6 +18,8 @@ foreach (get_all_bookmarks() as $item) {
         $bookmarkApiClient->updateDatabase($url, $item['tags'], $item['comment_raw']);
         $initComment = isset($item['comment_raw']) ? $item['comment_raw'] : "";
         $title = isset($item['title']) ? $item['title'] : "";
+        echo " URL: {$url}" . PHP_EOL;
+        echo " TITLE: " . mb_substr($title, 0, 100) . PHP_EOL;
         // エントリーデータの取得・判定
 //        $entry = $bookmarkApiClient->fetchEntry($url);
 //        if (empty($entry)) {
@@ -60,12 +62,9 @@ foreach (get_all_bookmarks() as $item) {
         }
         list($comment, $tags) = build_hatena_bookmark_comment($item);
         if (count_helpful_tag($tags ?: []) < 1) {
-            echo " URL: {$url}" . PHP_EOL;
             echo " ***** タグの数が少ないです *****" . PHP_EOL;
         }
         if ($initComment != $comment && ! empty($comment)) {
-            echo " URL: {$url}" . PHP_EOL;
-            echo " TITLE: " . mb_substr($title, 0, 100) . PHP_EOL;
             $bookmarkApiClient->put($url, $comment, $tags);
             echo " UPDATED COMMENT: " . $comment . PHP_EOL;
             echo " BEFORE  COMMENT: " . $initComment . PHP_EOL;

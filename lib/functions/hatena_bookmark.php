@@ -175,7 +175,8 @@ function build_hatena_bookmark_comment($item)
 
 function join_comment($tags, $comment, $created_epoch)
 {
-    if (! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
+    if (!empty($created_epoch) &&
+        ! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
         $comment = $comment . " ⌚" . date("Y/m/d H:i", $created_epoch);
     }
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
