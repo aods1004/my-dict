@@ -25,17 +25,15 @@ function get_all_bookmarks($useOfflineRss = false)
             foreach ($subjects as $tag) {
                 $tags[] = (string)$tag;
             }
-            list($comment, $tags) = build_hatena_bookmark_comment([
-                'tags' => $tags,
-                'comment' => strval($item->description),
-                'created_epoch' => strtotime(strval($item->date)),
-            ]);
+            list($comment, $tags) = join_comment(
+                $tags, strval($item->description), strtotime(strval($item->date)));
             yield [
                 'url' => strval($item->link),
                 'title' => strval($item->title),
                 'tags' => $tags,
                 'comment_raw' => $comment,
                 'comment' => strval($item->description),
+                'created_epoch' => strtotime(strval($item->date))
             ];
         }
     } else {
@@ -43,7 +41,8 @@ function get_all_bookmarks($useOfflineRss = false)
         $page = 1;
         while (true) {
             try {
-                $ret = $client->get("rss", ['query' => ["page" => $page++]]);
+                $ret = $client->get("rss", ['query' => ["page" => $page]]);
+                $page++;
             } catch (Throwable $exception) {
                 var_dump($exception);
                 break;
@@ -56,20 +55,20 @@ function get_all_bookmarks($useOfflineRss = false)
             foreach ($items as $item) {
                 $tags = [];
                 $ns = $item->getNamespaces(true);
-                foreach ($item->children($ns["dc"])->subject ?: [] as $tag) {
+                $dc = $item->children($ns["dc"]);
+                $subjects = isset($dc->subject) ? $dc->subject : [];
+                foreach ($subjects ?: [] as $tag) {
                     $tags[] = $tag;
                 }
-                list($comment, $tags) = build_hatena_bookmark_comment([
-                    'tags' => $tags,
-                    'comment' => strval($item->description),
-                    'created_epoch' => strtotime(strval($item->date)),
-                ]);
+                list($comment, $tags) = join_comment(
+                    $tags, strval($item->description), strtotime(strval($item->date)));
                 yield [
                     'url' => strval($item->link),
                     'title' => strval($item->title),
                     'tags' => $tags,
                     'comment_raw' => $comment,
                     'comment' => strval($item->description),
+                    'created_epoch' => strtotime(strval($item->date))
                 ];
             }
         }
@@ -162,23 +161,25 @@ function pattern_down_compare($chars, $a, $b)
 
 function build_hatena_bookmark_comment($item)
 {
-    $item['comment'] = !empty($item['comment']) ? $item['comment'] : "";
-    $item["created_epoch"] = !empty($item['created_epoch']) ? $item['created_epoch'] : time();
-    $item['tags'] = !empty($item['tags']) ? $item['tags'] : [];
-    $tags = [];
-    foreach ($item['tags'] as $i => $tag) {
+    $comment = !empty($item['comment']) ? $item['comment'] : "";
+    $created_epoch = !empty($item['created_epoch']) ? $item['created_epoch'] : time();
+    $tags = !empty($item['tags']) ? $item['tags'] : [];
+    foreach ($tags as $i => $tag) {
         $tags[] = optimise_tag_text($tag);
     }
     $tags = array_unique($tags);
     usort($tags, 'tag_compare');
-    // $tags = hatena_bookmark_try_to_append_tag($tags, "✅");
     $tags = array_slice($tags, 0, 10);
-    if (! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $item['comment'])) {
-        $item['comment'] = $item['comment'] . " ⌚" . date("Y/m/d H:i", $item["created_epoch"]);
+    return join_comment($tags, $comment, $created_epoch);
+}
+
+function join_comment($tags, $comment, $created_epoch)
+{
+    if (! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
+        $comment = $comment . " ⌚" . date("Y/m/d H:i", $created_epoch);
     }
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
-
-    return [$tag_text . $item['comment'], $tags];
+    return [$tag_text . $comment, $tags];
 }
 
 function count_helpful_tag(array $tags)

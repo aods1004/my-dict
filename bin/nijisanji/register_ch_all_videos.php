@@ -1,19 +1,19 @@
 <?php
 
 use Aods1004\MyDict\BookmarkApiClient;
-use \Aods1004\MyDict\BookmarkEntry;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
-$channel_id = 'UCmovZ2th3Sqpd00F5RdeigQ';
+$channel_id = 'UCeShTCVgZyq2lsBW9QwIJcw';
 
 // テストならはてなに投稿しない
-$preparation_flag = false; // true or false
+$preparation_flag = true; // true or false
 // はてなに登録ずみのエントリーをスキップする
 $skip_registered_entry_flag = true; // true or false
 // キーワード抽出に説明欄を加えるか？
-$include_description_flag = true;
+$include_description_flag = false;
 $list = get_all_upload_videos_by_channel_id($channel_id);
+// $list = get_all_upload_videos_by_channel_ids(get_youtube_channel_ids());
 
 START:
 echo "# START ########################################################" . PHP_EOL;
@@ -33,25 +33,22 @@ try {
         $url = $video['url'];
         $title = $video['channel_title'] . PHP_EOL . $video['title'];
         $published_at = '🎦' . date("Y/m/d H:i", $video['published_at']);
+
         $bookmark = [];
-        $registered_flag = $bookmarkClient->exist($url);
-        if ($registered_flag) {
+        if ($bookmarkClient->exist($url)) {
             if ($skip_registered_entry_flag) continue;
             $bookmark = $bookmarkClient->fetch($url);
         }
         list($comment, $created_epoch, $tags) = extract_bookmark($bookmark);
-
-        if (! preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
+        if (! preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/m", $comment, $match)) {
             $comment = $published_at . " " . $comment;
         }
-
         $extract_base = $title . ($include_description_flag ? $video['description'] : $title);
         if (check_exclude_url($url)) continue;
         ob_start();
         $no++;
         echo "# No. {$no} #########################################################" . PHP_EOL;
         echo " + " . get_hatebu_entry_url($url) . PHP_EOL;
-
         // タグの生成
         $tags = create_tags($url, $extract_base, $tags);
         if (!check_over_tag_limit($tags)) {
@@ -60,9 +57,10 @@ try {
             goto OUTPUT_INFO;
         }
         // 投稿内容の組み立て
-        list($comment, $tags) = build_hatena_bookmark_comment(compact('tags', 'comment', 'created_epoch'));
+        list($comment, $tags) = build_hatena_bookmark_comment(
+            compact('tags', 'comment', 'created_epoch'));
         // 更新する事項があるか？
-        if ($bookmarkClient->beNotChange($url, $tags)) {
+        if ($bookmarkClient->beNotChange($url, $tags, $comment)) {
             echo " ***** Bookmarkは更新されていません *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
@@ -100,8 +98,8 @@ if ($preparation_flag) {
 exit;
 
 function extract_bookmark($bookmark) {
-    $comment = isset($set['comment']) ? $bookmark['comment'] : '';
-    $created_epoch = isset($set['created_epoch']) ? $bookmark['created_epoch'] : null;
+    $comment = isset($bookmark['comment']) ? $bookmark['comment'] : '';
+    $created_epoch = isset($bookmark['created_epoch']) ? $bookmark['created_epoch'] : null;
     $tags = isset($bookmark['tags']) ? $bookmark['tags'] : [];
     return [$comment, $created_epoch, $tags];
 }
@@ -110,7 +108,6 @@ function check_exclude_url($url)
 {
     $exclude_urls = get_exclude_url();
     if (isset($exclude_urls[$url])) {
-        echo " ***** URLがスキップ対象です *****" . PHP_EOL;
         return true;
     }
     return false;

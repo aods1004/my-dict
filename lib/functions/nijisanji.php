@@ -30,3 +30,16 @@ function get_name_ruby_dict() {
     }
     return $name_ruby_dict;
 }
+/**
+ *   ルビ・名前辞書ロード
+ * ----------------------------------------------------------------------------------------------
+ */
+
+function get_youtube_channel_ids() {
+    $ret = [];
+    foreach (load_tsv(ROOT_DIR . "/data/list_nijisanji_ch.tsv") as $row) {
+        list(, $id) = $row;
+        $ret[] = trim($id);
+    }
+    return $ret;
+}
