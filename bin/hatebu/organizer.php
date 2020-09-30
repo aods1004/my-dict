@@ -91,11 +91,17 @@ $myTags = json_decode($res->getBody()->getContents(), true);
 foreach ($myTags['tags'] as $item) {
     $registeredTags[] = $item['tag'];
 }
+asort($usedTagCount, SORT_NUMERIC);
 $usedTags = array_keys($usedTagCount);
 sort($usedTags);
 sort($registeredTags);
+
+$usedTagStat = [];
+foreach ($usedTagCount as $tag => $key) {
+    $usedTagStat[] = $tag . "\t" . $usedTagCount[$tag];
+}
 $timestamp = date('Y-m-d_Hi');
-file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.txt", implode(PHP_EOL, $usedTags));
+file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.tsv", implode(PHP_EOL, $usedTagStat));
 file_put_contents(ROOT_DIR . "/_logs/hatebu_diff_tags_{$timestamp}.txt", "" .
     implode(PHP_EOL, array_diff($registeredTags, $usedTags)) . PHP_EOL .
     "------------------------------------------------------------" . PHP_EOL .

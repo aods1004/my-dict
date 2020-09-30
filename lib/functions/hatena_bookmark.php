@@ -235,7 +235,10 @@ function get_bookmark_api_client()
     ]);
 }
 
-function get_tag_exchanger()
+/**
+ * @return TagExchanger
+ */
+function get_tag_exchanger(): TagExchanger
 {
     $exchange = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
@@ -259,10 +262,10 @@ function get_tag_exchanger()
     }
 
     $extractKeywords = [];
-    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
+    $extractKeywordReader = function (&$extractKeywords, $row) {
         list($from, $to, $excludeWords) = $row + ["", "", ""];
         if (empty($from) || empty($to)) {
-            continue;
+            return;
         }
         $fromList = [$from];
         $fromList[] = str_replace(" ", "", $from);
@@ -275,7 +278,14 @@ function get_tag_exchanger()
                 'exclude' => array_filter(explode(',', $excludeWords))
             ];
         }
+    };
+    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $row) {
+        $extractKeywordReader($extractKeywords, $row);
     }
+    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
+        $extractKeywordReader($extractKeywords, $row);
+    }
+
     $replace = [
         "📽" => "🎥",
     ];
@@ -284,10 +294,10 @@ function get_tag_exchanger()
 
 function create_tags($url, $title, $tags)
 {
-    static $tagExchanger, $ltvCount = 100;
+    static $tagExchanger, $ltvCount = 10;
     if (empty($tagExchanger) || $ltvCount < 1) {
         $tagExchanger = get_tag_exchanger();
-        $ltvCount = 100;
+        $ltvCount = 10;
     }
     $ltvCount--;
     $tags = $tagExchanger->extractKeywords($tags, $title, $url);
@@ -307,4 +317,13 @@ function get_hatebu_entry_url($url)
         "https://" => "https://b.hatena.ne.jp/entry/s/",
         "http://" => "https://b.hatena.ne.jp/entry/",
     ]);
+}
+
+/**
+ * @param $url
+ * @return string
+ */
+function get_hatebu_add_url($url)
+{
+    return "https://b.hatena.ne.jp/aods1004/add.confirm?url=" . rawurlencode($url);
 }

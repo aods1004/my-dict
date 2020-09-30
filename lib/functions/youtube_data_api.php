@@ -61,7 +61,6 @@ function set_youtube_video_cache($id, $data)
 /**
  * @param $channel_id
  * @return array
- * @throws Throwable
  */
 function get_all_upload_videos_by_channel_id($channel_id)
 {
@@ -86,7 +85,8 @@ function get_all_upload_videos_by_channel_id($channel_id)
             $youtube->status = false;
             goto START;
         }
-        throw $exception;
+        var_dump($exception);
+        exit;
     }
 }
 
@@ -162,7 +162,10 @@ function get_all_upload_videos_by_playlist_id($playlist_id) {
                 'pageToken' => $pageToken,
             ]));
             foreach ($response->getItems() as $item) {
-                $ret[] = get_youtube_video($item->getContentDetails()->getVideoId());
+                $data = get_youtube_video($item->getContentDetails()->getVideoId());
+                if ($data) {
+                    $ret[] = $data;
+                }
             };
             $pageToken = $response->getNextPageToken() ?: null;
             if (!$pageToken) {
@@ -181,23 +184,31 @@ function get_all_upload_videos_by_playlist_id($playlist_id) {
 
 function get_youtube_video($id)
 {
-    $data = get_youtube_video_cache($id);
-    if (empty($data)) {
-        $youtube = get_youtube_client();
-        $videoResponse = $youtube->videos->listVideos('snippet', array_filter([
-            'id' => $id,
-        ]));
-        foreach ($videoResponse->getItems() as $video) {
-            $published_at = strtotime($video->getSnippet()->getPublishedAt());
-            $title = $video->getSnippet()->getTitle();
-            $description = $video->getSnippet()->getDescription();
-            $channel_title = $video->getSnippet()->getChannelTitle();
+    $data = get_youtube_video_cache($id) ?: null;
+    if (! empty($data)) {
+        if (! empty($data['title']) && !empty($data['description'])) {
+            return $data;
         }
-        $url = "https://www.youtube.com/watch?v=" . $id;
-        $data = compact('url', 'id', 'title', 'channel_title', 'description', 'published_at');
-        set_youtube_video_cache($id, $data);
+        return null;
     }
-    return $data;
+    $youtube = get_youtube_client();
+    $videoResponse = $youtube->videos->listVideos('snippet', array_filter([
+        'id' => $id,
+    ]));
+    foreach ($videoResponse->getItems() as $video) {
+        $published_at = strtotime($video->getSnippet()->getPublishedAt());
+        $title = $video->getSnippet()->getTitle();
+        $description = $video->getSnippet()->getDescription();
+        $channel_title = $video->getSnippet()->getChannelTitle();
+        $url = "https://www.youtube.com/watch?v=" . $id;
+
+        if (!empty($title) && ! empty($description) && ! empty($published_at)) {
+            $data = compact('url', 'id', 'title', 'channel_title', 'description', 'published_at');
+            set_youtube_video_cache($id, $data);
+            return $data;
+        }
+    }
+    return null;
 }
 
 /**

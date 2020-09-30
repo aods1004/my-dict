@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
-
 $fh = fopen(ROOT_DIR . "/dict/hatebu_tags.txt", "w");
 $i = 0;
 $notations = [];

@@ -28,7 +28,10 @@ function array_equal($a, $b)
     return true;
 }
 
-function get_http_client()
+/**
+ * @return Client
+ */
+function get_http_client(): Client
 {
     return new Client(['http_errors' => false,]);
 }
@@ -42,7 +45,7 @@ function get($url, array $option = []) {
     }
 }
 
-function check_url_status($url)
+function check_url_status($url): ?int
 {
     $client = get_http_client();
     try {
