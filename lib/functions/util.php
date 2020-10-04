@@ -4,11 +4,20 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 use GuzzleHttp\Client;
 
-function load_tsv($file_path)
+function sjis_win($word)
+{
+    return mb_convert_encoding($word, "SJIS-win");
+}
+
+/**
+ * @param $file_path
+ * @return Generator
+ */
+function load_tsv($file_path): Generator
 {
     $file = file($file_path);
     foreach ($file as $row) {
-        if (substr($row, 0, 1) === '!' || empty(trim($row))) {
+        if (strpos($row, '!') === 0 || empty(trim($row))) {
             continue;
         }
         $ret = [];
@@ -18,14 +27,6 @@ function load_tsv($file_path)
         }
         yield $ret;
     }
-}
-
-function array_equal($a, $b)
-{
-    if (array_diff($a, $b) || array_diff($b, $a)) {
-        return false;
-    }
-    return true;
 }
 
 /**
@@ -39,7 +40,7 @@ function get($url, array $option = []) {
     $client = get_http_client();
     try {
         $ret = $client->get($url, $option);
-        return json_decode($ret->getBody()->getContents(), true);
+        return json_decode($ret->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
     } catch (Throwable $e) {
         return null;
     }
@@ -58,5 +59,5 @@ function check_url_status($url): ?int
 
 function _elm($data, $key, $default = null)
 {
-    return isset($data[$key]) ? $data[$key] : $default;
+    return $data[$key] ?? $default;
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aods1004\MyDict;
 /**
  * Class BookmarkEntry
@@ -9,11 +10,11 @@ class BookmarkEntry
     /**
      * @var string
      */
-    private $title;
+    private string $title;
     /**
      * @var string
      */
-    private $url;
+    private string $url;
 
     /**
      * BookmarkEntry constructor.
@@ -28,7 +29,7 @@ class BookmarkEntry
     /**
      * @return bool
      */
-    public function isValid()
+    public function isValid(): bool
     {
         return !empty($this->title) && !empty($this->url);
     }
@@ -36,7 +37,7 @@ class BookmarkEntry
     /**
      * @return string
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -44,7 +45,7 @@ class BookmarkEntry
     /**
      * @return string
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
@@ -53,25 +54,11 @@ class BookmarkEntry
      * @param $url
      * @return string
      */
-    public function takeOverUrl($url)
+    public function takeOverUrl($url): string
     {
 
         if ($this->isValid() || $url != $this->getUrl()) {
             $url = $this->getUrl();
-
-            $query = parse_url($url, PHP_URL_QUERY);
-            if ($query) {
-                $newQueries = [];
-                foreach (explode("&", $query) as $pair) {
-                    $queryItems = [];
-                    foreach (explode("=", $pair) as $i) {
-                        $queryItems[] = $i;
-                        // $queryItems[] = rawurlencode($i);
-                    }
-                    $newQueries[] = implode("=", $queryItems);
-                }
-                $url = str_replace($query, implode("&", $newQueries), $url);
-            }
         }
         return $url;
     }

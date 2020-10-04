@@ -8,7 +8,7 @@ foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $line) {
     foreach (explode(",", $line[0]) as $word) {
         if (trim($word)) {
             $results[] = trim($word);
-            $resultSjis[] = mb_convert_encoding(trim($word), "SJIS");
+            $resultSjis[] = mb_convert_encoding(trim($word), "SJIS-win");
         }
     }
 }
@@ -16,15 +16,16 @@ foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $line) 
     foreach (explode(",", $line[0]) as $word) {
         if (trim($word)) {
             $results[] = trim($word);
-            $resultSjis[] = mb_convert_encoding(trim($word), "SJIS");
+            $resultSjis[] = sjis_win(trim($word));
         }
     }
 }
 
 $resultSjis = array_unique($resultSjis);
-$output = "// はてブキーワード" . PHP_EOL .
-          "// CASE=True" . PHP_EOL .
-          implode(PHP_EOL, $resultSjis);
+
+$output = sjis_win("// はてブキーワード") . PHP_EOL .
+    sjis_win("// CASE=True") . PHP_EOL .
+    implode(PHP_EOL, $resultSjis);
 file_put_contents(ROOT_DIR . "/dict/tags_extract_target_keywords.kwd", $output);
 
 $results = array_unique($results);

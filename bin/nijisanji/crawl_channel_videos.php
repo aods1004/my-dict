@@ -3,8 +3,8 @@
 use Aods1004\MyDict\BookmarkApiClient;
 
 require_once dirname(__DIR__) . "/../vendor/autoload.php";
-load_config();
-$list = get_all_upload_videos_by_channel_ids(get_youtube_channel_ids());
+$config = load_config();
+$list = get_all_upload_videos_by_channel_ids(get_youtube_channel_ids($config['file_surfix']));
 
 START:
 echo "! START ########################################################" . PHP_EOL;
@@ -22,7 +22,9 @@ try {
     $register_set = [];
     $count = 0;
     foreach (get_all_bookmarks() as $bookmark) {
-        if ($count > 50) break;
+        if ($count > 5) {
+            break;
+        }
         $bookmarkClient->fetch($bookmark['url']);
         $count++;
     }
@@ -30,32 +32,33 @@ try {
         $url = $video['url'];
         $title = $video['channel_title'] . PHP_EOL . $video['title'];
         $published_at = '🎦' . date("Y/m/d H:i", $video['published_at']);
-
         $bookmark = [];
         if ($bookmarkClient->exist($url)) {
-            if ($skip_registered_entry_flag) continue;
+            if ($skip_registered_entry_flag) {
+                continue;
+            }
             $bookmark = $bookmarkClient->fetch($url);
         }
-        list($comment, $created_epoch, $tags) = extract_bookmark($bookmark);
-        if (! preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/m", $comment, $match)) {
+        [$comment, $created_epoch, $tags] = extract_bookmark($bookmark);
+        if (!preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/mu", $comment, $match)) {
             $comment = $published_at . " " . $comment;
         }
         $extract_base = $title . ($include_description_flag ? $video['description'] : $title);
-        if (check_exclude_url($url)) continue;
+        if (check_exclude_url($url)) {
+            continue;
+        }
         ob_start();
         $no++;
         echo "! No. {$no} ===================================================================== " . PHP_EOL;
-        // echo " + " . get_hatebu_add_url($url) . PHP_EOL;
         // タグの生成
-        $tags = create_tags($url, $extract_base, $tags);
-        $tags = array_diff($tags, ["🌐YouTube"]);
+        $tags = array_diff( create_tags($url, $extract_base, $tags), ["🌐YouTube"]);
         if (!check_over_tag_limit($tags)) {
             usort($tags, 'tag_compare');
             $comment = "[" . implode("][", $tags) . "]";
             goto OUTPUT_INFO;
         }
         // 投稿内容の組み立て
-        list($comment, $tags) = build_hatena_bookmark_comment(compact('tags', 'comment', 'created_epoch'));
+        [$comment, $tags] = build_hatena_bookmark_comment(['tags' => $tags, 'comment' => $comment, 'created_epoch' => $created_epoch]);
         // 更新する事項があるか？
         if ($bookmarkClient->beNotChange($url, $tags, $comment)) {
             echo "! ***** Bookmarkは更新されていません *****" . PHP_EOL;
@@ -66,6 +69,7 @@ try {
             goto OUTPUT_INFO;
         }
         // 準備フラグがたっていれば、登録をスキップ
+        /** @noinspection DisconnectedForeachInstructionInspection */
         if ($skip_register_phase_flag) {
             echo "! ***** 登録内容のテストです *****" . PHP_EOL;
             goto OUTPUT_INFO;
@@ -103,7 +107,7 @@ exit;
  */
 function extract_bookmark($bookmark): array
 {
-    $comment = _elm($bookmark, 'comment','');
+    $comment = _elm($bookmark, 'comment', '');
     $created_epoch = _elm($bookmark, 'created_epoch');
     $tags = _elm($bookmark, 'tags', []);
     return [$comment, $created_epoch, $tags];
@@ -162,9 +166,6 @@ function output_info($url, $title, $comment)
 {
     echo $url . PHP_EOL;
     echo $comment . PHP_EOL;
-//    $list = explode("🎦", $comment);
-//    echo $list[0] . PHP_EOL;
-//    echo "! 🎦" . $list[1] . PHP_EOL;
     echo $title;
 }
 
@@ -186,6 +187,7 @@ function load_config(): array
         'skip_registered_entry' => true,
         'include_description' => false,
         'minimum_tag_count' => 2,
+        'file_surfix' => "",
     ];
     foreach (load_tsv(__DIR__ . "/crawl_channel_videos_config.tsv") as $row) {
         $ret[$row[0]] = $row[1];

@@ -4,6 +4,7 @@ namespace Aods1004\MyDict;
 
 use GuzzleHttp\Client;
 use \GuzzleHttp\Exception\GuzzleException;
+use JsonException;
 use \Psr\Http\Message\ResponseInterface;
 use PDO;
 
@@ -16,11 +17,11 @@ class BookmarkApiClient
     /**
      * @var Client
      */
-    private $client;
+    private Client $client;
     /**
-     * @var PDO
+     * @var PDO|null
      */
-    private $pdo;
+    private ?PDO $pdo;
 
     public function __construct(Client $client, PDO $pdo = null)
     {
@@ -37,24 +38,27 @@ class BookmarkApiClient
     public function fetch($url, array $initialTags = [])
     {
         $res = $this->client->get("my/bookmark", ['query' => ['url' => $url]]);
-        if ($res->getStatusCode() == '200') {
-            $item = json_decode($res->getBody()->getContents(), true);
-            $item['status'] = $res->getStatusCode();
-            $item['tags'] = isset($item['tags']) && is_array($item['tags']) ? $item['tags'] : [];
-            $item['tags'] = array_unique(array_merge($item['tags'], $initialTags ?: []));
-            $this->updateDatabase($url, $item['tags'], $item['comment_raw']);
-            return $item;
+        if ((string) $res->getStatusCode() === '200') {
+            try {
+                $item = json_decode($res->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                $item['tags'] = isset($item['tags']) && is_array($item['tags']) ? $item['tags'] : [];
+                $item['tags'] = array_unique(array_merge($item['tags'], $initialTags ?: []));
+                $this->updateDatabase($url, $item['tags'], $item['comment_raw']);
+                return $item;
+            } catch (JsonException $e) {
+                return null;
+            }
         }
         return null;
     }
 
     /**
-     * @param $url
+     * @param string $url
      * @return ResponseInterface
      * @throws GuzzleException
      *
      */
-    public function delete($url)
+    public function delete(string $url): ResponseInterface
     {
         $res = $this->client->delete("my/bookmark", [
             // 'query' => ['url' => $url],
@@ -72,7 +76,7 @@ class BookmarkApiClient
      */
     public function put($url, $comment, $tags)
     {
-        if (! $this->beNotChange($url, $tags, $comment)) {
+        if (! $this->beNotChange($url, $tags, $comment, strtotime("-1 day"))) {
             $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
             $this->updateDatabase($url, $tags, $comment);
             return json_decode($res->getBody()->getContents(), true);
@@ -85,33 +89,36 @@ class BookmarkApiClient
      * @param $comment
      * @param $tags
      */
-    public function updateDatabase($url, $tags, $comment)
+    public function updateDatabase($url, $tags, $comment): void
     {
         if($this->pdo) {
-            $st = $this->pdo->prepare("replace into bookmark (url, tags, comment_raw) values(:url,:tags,:comment_raw);");
+            $st = $this->pdo->prepare("replace into bookmark (url, tags, comment_raw, stored_at) values(:url,:tags,:comment_raw, :stored_at);");
             $st->bindValue(":url", $url);
             $st->bindValue(":tags", implode(",", $tags));
             $st->bindValue(":comment_raw", $comment);
+            $st->bindValue(":stored_at", time());
             $st->execute();
         }
     }
 
     /**
-     * @param $url
-     * @param $comment
-     * @param $tags
+     * @param string $url
+     * @param string $comment
+     * @param array $tags
+     * @param int $newThen
      * @return bool
      */
-    public function beNotChange($url, $tags, $comment = null)
+    public function beNotChange(string $url, $tags = [], $comment = null, int $newThen = 0): bool
     {
         if($this->pdo) {
-            $query = "select 1 from bookmark where url = :url and tags = :tags";
+            $query = "select 1 from bookmark where url = :url and tags = :tags and stored_at > :stored_at";
             if (! is_null($comment)) {
                 $query .= " and comment_raw = :comment_raw";
             }
             $st = $this->pdo->prepare($query);
             $st->bindValue(":url", $url);
             $st->bindValue(":tags", implode(",", $tags));
+            $st->bindValue(":stored_at", $newThen);
             if (!is_null($comment)) {
                 $st->bindValue(":comment_raw", $comment);
             }
@@ -125,13 +132,15 @@ class BookmarkApiClient
     }
     /**
      * @param $url
+     * @param int $newThen
      * @return bool
      */
-    public function exist($url)
+    public function exist($url, int $newThen = 0): bool
     {
         if($this->pdo) {
-            $st = $this->pdo->prepare("select 1 from bookmark where url = :url;");
+            $st = $this->pdo->prepare("select 1 from bookmark where url = :url and stored_at > :stored_at");
             $st->bindValue(":url", $url);
+            $st->bindValue(":stored_at", $newThen);
             $st->execute();
             $data = $st->fetchAll();
             if (! empty($data)) {
@@ -143,7 +152,7 @@ class BookmarkApiClient
 
     /**
      * @param $url
-     * @return BookmarkEntry
+     * @return BookmarkEntry|null
      * @throws GuzzleException
      */
     public function fetchEntry($url)

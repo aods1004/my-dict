@@ -510,6 +510,7 @@ Web制作
 🌈👥ゆきぼし
 🌈👥ゆずでび
 🌈👥ゆめぱんだ
+🌈👥ようちえんぐみ
 🌈👥りむみゃあ
 🌈👥りりぃろーず
 🌈👥りんかえW
@@ -832,6 +833,7 @@ Web制作
 🎮Craftopia
 🎮DELTARUNE
 🎮DMMスクラッチ
+🎮DQモンスターズ
 🎮DbD
 🎮Dead by Daylight
 🎮Detroit Become Human
@@ -843,6 +845,7 @@ Web制作
 🎮HEAVY RAIN
 🎮HITMAN
 🎮League of Legends
+🎮Left 4 Dead 2
 🎮Minecraft
 🎮Muse Dash
 🎮OUTLAST
@@ -1141,6 +1144,7 @@ Web制作
 🔖🌈歌リレー
 🔖🎮VFGパーティー
 🔧工作動画
+🗣テーマトーク
 🗣フリーチャット
 🗣ラジオ
 🗣雑談

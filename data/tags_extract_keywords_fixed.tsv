@@ -500,7 +500,6 @@ VΔLZ	🌈👥VΔLZ
 le_jouet	🌈加賀美ハヤト
 le_jouet	🌈夢追翔
 le_jouet	🌈緑仙
-le_jouet	🌈👥JαCK
 le_jouet	🌈👥le jouet
 あかんごちぐ	🌈周央サンゴ
 あかんごちぐ	🌈朝日南アカネ
@@ -1133,6 +1132,8 @@ on Twitter	💬つぶやき
 
 ! URL
 ! -------------------------------------------------------------
+twitter.com,status	💬つぶやき
+twitter.com	🌐Twitter
 dic.nicovideo.jp	🌐niconico
 dic.nicovideo.jp	🌐ニコニコ大百科
 dic.nicovideo.jp	🍀単語記事
@@ -1156,11 +1157,13 @@ www.tiktok.com	🌐TikTok
 www.twitch.com	🌐Twitch
 www.twitch.tv	🌐Twitch
 www.youtube.com/watch	🌐YouTube
+playboard.co	🌐PLAYBOARD
 
 ! www.youtube.com - ゲーム
 ! -------------------------------------------------------------
 www.youtube.com/watch,#wows	🎮World of Warships
 www.youtube.com/watch,1-2-Switch	🎮ゲーム実況
+www.youtube.com/watch,1-2Switch	🎮ゲーム実況
 www.youtube.com/watch,100% orange juice	🎮ゲーム実況
 www.youtube.com/watch,180sDIEving	🎧ゲーム実況
 www.youtube.com/watch,1bitHeart	🎧ゲーム実況
@@ -1286,7 +1289,7 @@ www.youtube.com/watch,DMMにじさんじスクラッチ	🎮DMMスクラッチ
 www.youtube.com/watch,DMMスクラッチ	🎮DMMスクラッチ
 www.youtube.com/watch,DOAX	🎮ゲーム実況
 www.youtube.com/watch,DONCUP	🎮PUBG
-www.youtube.com/watch,DQ1	🎮ドラゴンクエスト
+www.youtube.com/watch,DQ1	🎮ドラゴンクエスト	iXBBkDQ12YY
 www.youtube.com/watch,DQ2	🎮ドラゴンクエスト
 www.youtube.com/watch,DQ3	🎮ドラゴンクエスト
 www.youtube.com/watch,DQMJ	🎮DQモンスターズ
@@ -1679,6 +1682,7 @@ www.youtube.com/watch,The Walking Fish 2	🎮ゲーム実況
 www.youtube.com/watch,The Watchers	🎮ホラゲ実況
 www.youtube.com/watch,The Witcher 3,Wild Hunt	🎮ゲーム実況
 www.youtube.com/watch,The forest	🎮The Forest
+www.youtube.com/watch,TheForest	🎮The Forest
 www.youtube.com/watch,The house	🎮ホラゲ実況
 www.youtube.com/watch,Thief Simulator	🎮ゲーム実況
 www.youtube.com/watch,This War of Mine	🎮ゲーム実況
@@ -2004,8 +2008,10 @@ www.youtube.com/watch,スペランカーZ	🎮ゲーム実況
 www.youtube.com/watch,スペルブレイク	🎮ゲーム実況
 www.youtube.com/watch,スマブラ	🎮スマブラ
 www.youtube.com/watch,スリザリオ	🎮Slither.io
-www.youtube.com/watch,スーパードンキーコング	🎮SUPER DONKEY KONG
+www.youtube.com/watch,スーパードンキーコング	🎮ドンキーコング
+www.youtube.com/watch,ドンキーコング トロピカルフリーズ	🎮ドンキーコング
 www.youtube.com/watch,スーパーマリオ	🎮スーパーマリオ	マリオメーカー,マリオRPG,マリオパーティ
+www.youtube.com/watch,スーパーマリオワールド	🎮スーパーマリオ	マリオメーカー,マリオRPG,マリオパーティ
 www.youtube.com/watch,セインツロウ	🎮ゲーム実況
 www.youtube.com/watch,セブンスドラゴン2020	🎮ゲーム実況
 www.youtube.com/watch,ゼノブレDE	🎮ゲーム実況
@@ -2164,6 +2170,7 @@ www.youtube.com/watch,マリオRPG	🎮マリオRPG
 www.youtube.com/watch,マリオUDX	🎮スーパーマリオ	マリオRPG,マリオメーカー
 www.youtube.com/watch,マリオUSA	🎮スーパーマリオ
 www.youtube.com/watch,マリオカート	🎮マリオカート
+www.youtube.com/watch,マリオカート8	🎮マリオカート
 www.youtube.com/watch,マリオストーリー	🎮マリオストーリー
 www.youtube.com/watch,マリオテニス	🎮マリオテニス
 www.youtube.com/watch,マリオデ	🎮スーパーマリオ	マリオRPG,マリオメーカー
@@ -2171,6 +2178,7 @@ www.youtube.com/watch,マリオパーティ	🎮マリオパーティ
 www.youtube.com/watch,マリオパーティー	🎮マリオパーティ
 www.youtube.com/watch,マリオメーカ	🎮マリオメーカー
 www.youtube.com/watch,マリオメーカー２	🎮マリオメーカー
+www.youtube.com/watch,マリオメーカー2	🎮マリオメーカー
 www.youtube.com/watch,マリオワールド	🎮スーパーマリオ
 www.youtube.com/watch,マリオーメーカー2	🎮マリオメーカー
 www.youtube.com/watch,マリオ＆ソニック	🎮ゲーム実況
@@ -2217,6 +2225,7 @@ www.youtube.com/watch,リトルナイトメア	🎮ゲーム実況
 www.youtube.com/watch,リネレボ	🎮ゲーム実況
 www.youtube.com/watch,リンクスリングス	🎮ゲーム実況
 www.youtube.com/watch,リングフィット	🎮Ring Fit Adventure
+www.youtube.com/watch,リングフィットアドベンチャー	🎮Ring Fit Adventure
 www.youtube.com/watch,ルイージ,マンション	🎮ルイージマンション
 www.youtube.com/watch,ルイージマンション	🎮ルイージマンション
 www.youtube.com/watch,ルナフォン	🎮ゲーム実況
@@ -2749,7 +2758,7 @@ www.youtube.com/watch,郡道美玲,星川	🌈星川サラ
 www.youtube.com/watch,郡道美玲,本間さん	🌈本間ひまわり
 www.youtube.com/watch,郡道美玲,椎名	🌈椎名唯華
 www.youtube.com/watch,郡道美玲,野良猫	🌈文野環
-www.youtube.com/watch,鈴原るる,ドンキーコング３	🎮SUPER DONKEY KONG
+www.youtube.com/watch,鈴原るる,ドンキーコング３	🎮ドンキーコング
 www.youtube.com/watch,鈴原るる,零	🎮ゲーム実況
 www.youtube.com/watch,鈴木勝,ちひろ	🌈勇気ちひろ
 www.youtube.com/watch,鈴木勝,ハジメ先輩	🌈渋谷ハジメ

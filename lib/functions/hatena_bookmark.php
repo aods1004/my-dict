@@ -7,33 +7,33 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Aods1004\MyDict\TagExchanger;
 
-function get_bookmark_feed_client($account)
+function get_bookmark_feed_client($account): Client
 {
     return new Client(['base_uri' => 'https://b.hatena.ne.jp/' . $account . '/']);
 }
 
-function get_all_bookmarks($useOfflineRss = false)
+function get_all_bookmarks($useOfflineRss = false): Generator
 {
     if ($useOfflineRss) {
         // download from https://b.hatena.ne.jp/-/my/config/data_management
-        $data = simplexml_load_file(ROOT_DIR . "/data/" . HATENA_MY_ACCOUNT . ".bookmarks.rss");
-        foreach (isset($data->item) ? $data->item : [] as $item) {
-            $tags = [];
+        $data = simplexml_load_string(file_get_contents(ROOT_DIR . "/data/" . HATENA_MY_ACCOUNT . ".bookmarks.rss"));
+        foreach ($data->item ?? [] as $item) {
             $ns = $item->getNamespaces(true);
             $dc = $item->children($ns["dc"]);
-            $subjects = isset($dc->subject) ? $dc->subject : [];
+            $subjects = $dc->subject ?? [];
+            $tags = [];
             foreach ($subjects as $tag) {
-                $tags[] = (string)$tag;
+                $tags[] = (string) $tag;
             }
-            list($comment, $tags) = join_comment(
-                $tags, strval($item->description), strtotime(strval($item->date)));
+            list($comment_raw, $tags) = join_comment(
+                $tags, (string)$item->description, strtotime((string)$item->date));
             yield [
-                'url' => strval($item->link),
-                'title' => strval($item->title),
+                'url' => (string)$item->link,
+                'title' => (string)$item->title,
                 'tags' => $tags,
-                'comment_raw' => $comment,
-                'comment' => strval($item->description),
-                'created_epoch' => strtotime(strval($item->date))
+                'comment_raw' => $comment_raw,
+                'comment' => (string)$item->description,
+                'created_epoch' => strtotime((string)$item->date)
             ];
         }
     } else {
@@ -48,34 +48,39 @@ function get_all_bookmarks($useOfflineRss = false)
                 break;
             }
             $data = simplexml_load_string($ret->getBody()->getContents());
-            $items = isset($data->item) ? $data->item : [];
+            $items = $data->item ?? [];
             if (empty($items)) {
                 break;
             }
             foreach ($items as $item) {
-                $tags = [];
+                /**
+                 * @type $subjects
+                 */
+
                 $ns = $item->getNamespaces(true);
                 $dc = $item->children($ns["dc"]);
-                $subjects = isset($dc->subject) ? $dc->subject : [];
-                foreach ($subjects ?: [] as $tag) {
-                    $tags[] = $tag;
+
+                $tags = [];
+                if ($dc->subject) {
+                    foreach ($dc->subject as $tag) {
+                        $tags[] = (string) $tag;
+                    }
                 }
-                list($comment, $tags) = join_comment(
-                    $tags, strval($item->description), strtotime(strval($item->date)));
+                [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
                 yield [
-                    'url' => strval($item->link),
-                    'title' => strval($item->title),
+                    'url' => (string)$item->link,
+                    'title' => (string)$item->title,
                     'tags' => $tags,
-                    'comment_raw' => $comment,
-                    'comment' => strval($item->description),
-                    'created_epoch' => strtotime(strval($item->date))
+                    'comment_raw' => $comment_raw,
+                    'comment' => (string)$item->description,
+                    'created_epoch' => strtotime((string)$item->date)
                 ];
             }
         }
     }
 }
 
-function tag_compare($a, $b)
+function tag_compare($a, $b): int
 {
     // 先頭に置く
     $ret = pattern_up_compare(["🔖","🌈👥"], $a, $b);
@@ -104,7 +109,7 @@ function tag_compare($a, $b)
     return ($a > $b) ? 0 : 1;
 }
 
-function pattern_fav_tags($a, $b)
+function pattern_fav_tags($a, $b): ?int
 {
     static $favTags;
     if (empty($favTags)) {
@@ -126,7 +131,7 @@ function pattern_fav_tags($a, $b)
     return null;
 }
 
-function pattern_up_compare($chars, $a, $b)
+function pattern_up_compare($chars, $a, $b): ?int
 {
     foreach ($chars as $char) {
         if (strpos($a, $char) === 0 && strpos($b, $char) === false) {
@@ -142,7 +147,7 @@ function pattern_up_compare($chars, $a, $b)
     return null;
 }
 
-function pattern_down_compare($chars, $a, $b)
+function pattern_down_compare($chars, $a, $b): ?int
 {
     foreach ($chars as $char) {
         if (strpos($a, $char) === 0 && strpos($b, $char) === false) {
@@ -158,10 +163,13 @@ function pattern_down_compare($chars, $a, $b)
     return null;
 }
 
-
-function build_hatena_bookmark_comment($item)
+/**
+ * @param $item
+ * @return array
+ */
+function build_hatena_bookmark_comment($item): array
 {
-    $comment = !empty($item['comment']) ? $item['comment'] : "";
+    $comment = !empty($item['comment']) ? trim($item['comment']) : "";
     $created_epoch = !empty($item['created_epoch']) ? $item['created_epoch'] : time();
     $tags = !empty($item['tags']) ? $item['tags'] : [];
     foreach ($tags as $i => $tag) {
@@ -173,17 +181,33 @@ function build_hatena_bookmark_comment($item)
     return join_comment($tags, $comment, $created_epoch);
 }
 
-function join_comment($tags, $comment, $created_epoch)
+/**
+ * @param $tags
+ * @param $comment
+ * @param $created_epoch
+ * @return array
+ */
+function join_comment($tags, $comment, $created_epoch): array
 {
-    if (!empty($created_epoch) &&
-        ! preg_match("/ ⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment)) {
-        $comment = $comment . " ⌚" . date("Y/m/d H:i", $created_epoch);
+    $comment = trim($comment);
+    if (preg_match("/⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/mu", $comment, $matches)) {
+        $comment_main = trim(str_replace($matches[0], "", $comment));
+        $comment = implode(" ", array_filter([$comment_main, $matches[0]]));
+    }
+    if (!empty($created_epoch)) {
+        if (! preg_match("/⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/mu", $comment)) {
+            $comment = implode(" ", array_filter([trim($comment), "⌚" . date("Y/m/d H:i", $created_epoch)]));
+        }
     }
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
     return [$tag_text . $comment, $tags];
 }
 
-function count_helpful_tag(array $tags)
+/**
+ * @param array $tags
+ * @return int
+ */
+function count_helpful_tag(array $tags): int
 {
     $count = 0;
     $list = explode(",", "🍀,🚪,💬,🌐,🎨,✂");
@@ -195,30 +219,24 @@ function count_helpful_tag(array $tags)
     return $count;
 }
 
-function optimise_tag_text($text = "")
+/**
+ * @param string $text
+ * @return string
+ */
+function optimise_tag_text($text = ""): string
 {
     $text = trim($text);
     $text = strtr($text, ["[" => "", "]" => "", "　" => " "]);
     while (strlen($text) > 33) {
-        $text = mb_substr($text, 0, mb_strlen($text) - 2) . "…";
+        $text = mb_substr($text, 0, -2) . "…";
     }
     return $text;
 }
 
-function hatena_bookmark_try_to_append_tag($tags, $addTag)
-{
-    foreach ($tags as $key => $tag) {
-        if ($tag == $addTag) {
-            unset($tags[$key]);
-        }
-    }
-    if (count($tags) < 10 && !in_array($addTag, $tags)) {
-        array_push($tags, $addTag);
-    }
-    return $tags;
-}
-
-function get_bookmark_api_client()
+/**
+ * @return Client
+ */
+function get_bookmark_api_client(): Client
 {
     $stack = HandlerStack::create();
     $stack->push(new Oauth1([
@@ -242,7 +260,7 @@ function get_tag_exchanger(): TagExchanger
 {
     $exchange = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
-        list($from, $to) = $row + ["", ""];
+        [$from, $to] = $row + ["", ""];
         if (empty($from) || empty($to)) {
             continue;
         }
@@ -256,14 +274,16 @@ function get_tag_exchanger(): TagExchanger
     }
     $redundant = [];
     foreach (load_tsv(ROOT_DIR . "/data/tags_redundant.tsv") as $row) {
-        list($necessary, $unnecessary) = $row + ["", ""];
-        if (empty($necessary) || empty($unnecessary)) continue;
+        [$necessary, $unnecessary] = $row + ["", ""];
+        if (empty($necessary) || empty($unnecessary)) {
+            continue;
+        }
         $redundant[] = compact('necessary', 'unnecessary');
     }
 
     $extractKeywords = [];
-    $extractKeywordReader = function (&$extractKeywords, $row) {
-        list($from, $to, $excludeWords) = $row + ["", "", ""];
+    $extractKeywordReader = static function (&$extractKeywords, $row) {
+        [$from, $to, $excludeWords] = $row + ["", "", ""];
         if (empty($from) || empty($to)) {
             return;
         }
@@ -292,7 +312,13 @@ function get_tag_exchanger(): TagExchanger
     return new TagExchanger($extractKeywords, $exchange, $replace, $exclude, $redundant);
 }
 
-function create_tags($url, $title, $tags)
+/**
+ * @param $url
+ * @param $title
+ * @param $tags
+ * @return array
+ */
+function create_tags($url, $title, $tags): array
 {
     static $tagExchanger, $ltvCount = 10;
     if (empty($tagExchanger) || $ltvCount < 1) {
@@ -311,19 +337,10 @@ function create_tags($url, $title, $tags)
  * @param $url
  * @return string
  */
-function get_hatebu_entry_url($url)
+function get_hatebu_entry_url($url): string
 {
     return strtr($url, [
         "https://" => "https://b.hatena.ne.jp/entry/s/",
         "http://" => "https://b.hatena.ne.jp/entry/",
     ]);
-}
-
-/**
- * @param $url
- * @return string
- */
-function get_hatebu_add_url($url)
-{
-    return "https://b.hatena.ne.jp/aods1004/add.confirm?url=" . rawurlencode($url);
 }

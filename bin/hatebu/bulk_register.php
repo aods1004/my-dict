@@ -14,7 +14,7 @@ foreach (load_tsv(ROOT_DIR . "/data/hatebu_bulk_register.tsv") as $row) {
         list($url, $tags) = $row;
         echo "URL: " . $url . PHP_EOL;
         $tags = explode(',', $tags);
-        if ($itemFetcher->fetch($url)) {
+        if ($itemFetcher->exist($url)) {
             echo " ***** すでに登録されています ($url) *****" . PHP_EOL;
             continue;
         }
