@@ -25,7 +25,7 @@ class Organizer
     {
         if ($i % 100 === 1) {
             echo PHP_EOL;
-            echo str_pad(ceil($i / 100), 7, " ", STR_PAD_LEFT) . " ";
+            echo str_pad($i, 7, " ", STR_PAD_LEFT) . " ";
         }
     }
 
@@ -49,6 +49,9 @@ class Organizer
             $usedTagStat[] = $tag . "\t" . $usedTagCount[$tag];
         }
         $timestamp = date('Y-m-d_Hi');
-        file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.tsv", implode(PHP_EOL, $usedTagStat));
+        $body = implode(PHP_EOL, $usedTagStat);
+        file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.tsv", $body);
+        file_put_contents(ROOT_DIR . "/dict/hatebu_tags_use_count.tsv", $body);
+        pattern_used_count("", "", true);
     }
 }

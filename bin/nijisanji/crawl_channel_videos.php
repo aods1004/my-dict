@@ -30,7 +30,7 @@ try {
     }
     foreach (array_reverse($list) as $video) {
         $url = $video['url'];
-        $title = $video['channel_title'] . PHP_EOL . $video['title'];
+        $title = $video['title'] . PHP_EOL . $video['channel_title'];
         $published_at = '🎦' . date("Y/m/d H:i", $video['published_at']);
         $bookmark = [];
         if ($bookmarkClient->exist($url)) {
@@ -51,13 +51,12 @@ try {
         $no++;
         echo "! No. {$no} ===================================================================== " . PHP_EOL;
         // タグの生成
-        $tags = array_diff( create_tags($url, $extract_base, $tags), ["🌐YouTube"]);
-        if (!check_over_tag_limit($tags)) {
-            usort($tags, 'tag_compare');
-            $comment = "[" . implode("][", $tags) . "]";
-            goto OUTPUT_INFO;
-        }
+        $tags = create_tags($url, $extract_base, $tags);
+        $output_tags = array_diff($tags , ["🌐YouTube"]);
+        check_over_tag_limit($tags);
         // 投稿内容の組み立て
+        [$output_comment, ] = build_hatena_bookmark_comment(
+            ['tags' => $output_tags, 'comment' => $comment, 'created_epoch' => $created_epoch], false);
         [$comment, $tags] = build_hatena_bookmark_comment(['tags' => $tags, 'comment' => $comment, 'created_epoch' => $created_epoch]);
         // 更新する事項があるか？
         if ($bookmarkClient->beNotChange($url, $tags, $comment)) {
@@ -71,13 +70,12 @@ try {
         // 準備フラグがたっていれば、登録をスキップ
         /** @noinspection DisconnectedForeachInstructionInspection */
         if ($skip_register_phase_flag) {
-            echo "! ***** 登録内容のテストです *****" . PHP_EOL;
             goto OUTPUT_INFO;
         }
         // 登録用配列に設定
         $register_set[] = compact('url', 'comment', 'tags');
         OUTPUT_INFO:
-        output_info($url, $title, $comment);
+        output_info($url, $title, $output_comment);
         CLEAN_UP:
         clean_up();
         $output[] = ob_get_flush();
@@ -85,6 +83,7 @@ try {
     if ($register_set) {
         echo "# POST TO HATEBU ###############################################" . PHP_EOL;
         foreach ($register_set as $set) {
+            var_dump($set["url"]);
             $bookmarkClient->put($set['url'], $set['comment'], $set['tags']);
         }
     }
@@ -95,7 +94,7 @@ $output = array_reverse($output);
 file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));
 
 if ($skip_register_phase_flag) {
-    sleep(3);
+    sleep(5);
     goto START;
 }
 set_config("skip_register_phase", 1);
@@ -119,11 +118,7 @@ function extract_bookmark($bookmark): array
  */
 function check_exclude_url($url): bool
 {
-    $exclude_urls = get_exclude_url();
-    if (isset($exclude_urls[$url])) {
-        return true;
-    }
-    return false;
+    return is_exclude_url($url);
 }
 
 /**
@@ -134,8 +129,8 @@ function check_over_tag_limit($tags): bool
 {
     $tagCount = count_helpful_tag($tags);
     if ($tagCount > 10) {
-        echo "! ***** ERROR ****************" . PHP_EOL;
-        echo "! ***** タグが多いです ($tagCount)*****" . PHP_EOL;
+        echo "! ***** WARNING ****************" . PHP_EOL;
+        echo "! * タグが多いです ($tagCount) " . PHP_EOL;
         return false;
     }
     return true;

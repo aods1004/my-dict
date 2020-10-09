@@ -7,23 +7,23 @@ class TagExchanger
     /**
      * @var array
      */
-    private $extractKeywords = [];
+    private array $extractKeywords;
     /**
      * @var array
      */
-    private $exchange = [];
+    private array $exchange;
     /**
      * @var array
      */
-    private $exclude = [];
+    private array $exclude;
     /**
      * @var array
      */
-    private $replace = [];
+    private array $replace;
     /**
      * @var array
      */
-    private $redundant = [];
+    private array $redundant;
     /**
      * TagExchanger constructor.
      * @param array $extractKeywords
@@ -47,7 +47,7 @@ class TagExchanger
      * @param $url
      * @return array
      */
-    public function extractKeywords($tags, $title, $url)
+    public function extractKeywords($tags, $title, $url): array
     {
         $haystack = $title . " " . urldecode($url);
         $appendTags = [];
@@ -67,8 +67,7 @@ class TagExchanger
         }
         $tags = array_values($tags);
         $appendTags = array_values($appendTags);
-        $ret = array_unique(array_merge($tags, $appendTags));
-        return $ret;
+        return array_unique(array_merge($tags, $appendTags));
     }
 
     /**
@@ -76,7 +75,7 @@ class TagExchanger
      * @param $wordStr
      * @return bool
      */
-    private function checkIncludeWord($haystack, $wordStr)
+    private function checkIncludeWord($haystack, $wordStr): bool
     {
         $words = array_filter(explode(',', $wordStr));
         $count = count($words);
@@ -84,14 +83,19 @@ class TagExchanger
         if ($count) {
             foreach ($words as $word) {
                 if (strpos($haystack, $word) !== false) {
-                    $result += 1;
+                    ++$result;
                 }
             }
         }
-        return ($result > 0 && $count == $result);
+        return ($result > 0 && $count === $result);
     }
 
-    private function checkExcludeWord($haystack, array $exclude)
+    /**
+     * @param $haystack
+     * @param array $exclude
+     * @return bool
+     */
+    private function checkExcludeWord($haystack, array $exclude): bool
     {
         $flag = false;
         if ($exclude) {
@@ -108,14 +112,14 @@ class TagExchanger
      * @param array $tags
      * @return array
      */
-    public function exchange(array $tags)
+    public function exchange(array $tags): array
     {
         if (!empty($tags)) {
             $altTags = [];
             foreach ($tags as $key => $tag) {
-                if (! in_array($tag, $this->exclude)) {
+                if (! in_array($tag, $this->exclude, true)) {
                     foreach ($this->exchange as $from => $to) {
-                        if ($tag == $from) {
+                        if ($tag === $from) {
                             $tag = $to;
                         }
                     }
@@ -134,24 +138,29 @@ class TagExchanger
      * @param array $tags
      * @return array
      */
-    public function optimise(array $tags)
+    public function optimise(array $tags): array
     {
         foreach ($tags as $key => $tag) {
             $tags[$key] = optimise_tag_text($tag);
         }
         return $tags;
     }
-
-    public function removeRedundant(array $tags)
+    public function removeRedundant(array $tags): array
     {
         $unnecessaries = [];
         foreach ($this->redundant as $item) {
             $necessary = trim($item['necessary']);
             $unnecessary = trim($item['unnecessary']);
-            if (in_array($necessary, $tags) && in_array($unnecessary, $tags)) {
+            if (in_array($necessary, $tags, true) && in_array($unnecessary, $tags, true)) {
                 $unnecessaries[] = $unnecessary;
             }
         }
         return array_values(array_diff($tags, $unnecessaries));
     }
+
+    public function organize(array $tags): array
+    {
+        usort($tags, 'tag_compare');
+    }
+
 }

@@ -285,9 +285,13 @@ Web制作
 🌈🇰🇷 Lee Roha
 🌈🇰🇷 Lee Siu
 🌈🇰🇷 Min Suha
+🌈🇰🇷 Oh Jiyu
+🌈🇰🇷 Ryu Hari
+🌈🇰🇷 Shin Kiru
 🌈🇰🇷 Shin Yuya
 🌈🇰🇷 So Nagi
 🌈🇰🇷 Wiffy
+🌈🇰🇷 Yang Nari
 🌈🌒Ph.エバンス
 🌈🌒サイルスト
 🌈🌒ユードリック
@@ -378,6 +382,7 @@ Web制作
 🌈👥おりコウ
 🌈👥お給仕カルテット
 🌈👥かえる
+🌈👥かざちー
 🌈👥かざガク
 🌈👥かなえぼし
 🌈👥かなしいくず
@@ -399,6 +404,7 @@ Web制作
 🌈👥くろのわちー
 🌈👥ぐんかん
 🌈👥ぐんかんフラワーズ
+🌈👥けいあい
 🌈👥こあくまん
 🌈👥ここフレわんわん
 🌈👥ござやよ
@@ -850,6 +856,8 @@ Web制作
 🎮Muse Dash
 🎮OUTLAST
 🎮Overcooked
+🎮Overwatch
+🎮PLUG&PLAY
 🎮PSO2
 🎮PUBG
 🎮Portal
@@ -860,11 +868,13 @@ Web制作
 🎮SUPER DONKEY KONG
 🎮Shadowverse
 🎮Slay the Spire
+🎮Slither.io
 🎮Splatoon
 🎮Stardew Valley
 🎮Super Bunny Man
 🎮Terraria
 🎮The
+🎮The Forest
 🎮UNO
 🎮Undertale
 🎮VALORANT
@@ -903,6 +913,7 @@ Web制作
 🎮ブレイブリーデフォルト
 🎮ペーパーマリオ
 🎮ホラゲ実況
+🎮ボンバーマン
 🎮ボードゲーム
 🎮ポケットモンスター
 🎮ポケモンスナップ

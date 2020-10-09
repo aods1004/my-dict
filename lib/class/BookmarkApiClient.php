@@ -60,28 +60,28 @@ class BookmarkApiClient
      */
     public function delete(string $url): ResponseInterface
     {
-        $res = $this->client->delete("my/bookmark", [
+        return $this->client->delete("my/bookmark", [
             // 'query' => ['url' => $url],
             "form_params" => ["url" => $url],
         ]);
-        return $res;
     }
 
     /**
      * @param $url
      * @param $comment
      * @param $tags
-     * @return mixed
+     * @return bool
      * @throws GuzzleException
      */
-    public function put($url, $comment, $tags)
+    public function put($url, $comment, $tags): bool
     {
-        if (! $this->beNotChange($url, $tags, $comment, strtotime("-1 day"))) {
-            $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
+        $res = $this->client->post("my/bookmark", ["form_params" => ["url" => $url, "comment" => $comment]]);
+        $status = (string) $res->getStatusCode();
+        if (strpos($status, "2") === 0) {
             $this->updateDatabase($url, $tags, $comment);
-            return json_decode($res->getBody()->getContents(), true);
+            return true;
         }
-        return null;
+        return false;
     }
 
     /**
@@ -154,11 +154,12 @@ class BookmarkApiClient
      * @param $url
      * @return BookmarkEntry|null
      * @throws GuzzleException
+     * @throws JsonException
      */
-    public function fetchEntry($url)
+    public function fetchEntry($url): ?BookmarkEntry
     {
         $res = $this->client->get("entry", ['query' => ['url' => $url]]);
-        $entry = json_decode($res->getBody()->getContents(), true);
+        $entry = json_decode($res->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         if ($entry) {
             return new BookmarkEntry($entry);
         }

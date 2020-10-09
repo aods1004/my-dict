@@ -225,3 +225,16 @@ function get_exclude_url() {
     }
     return $ret;
 }
+
+function is_exclude_url($url): bool
+{
+    static $stmt;
+    if (! $stmt) {
+        $pdo = new PDO(DSN_BOOKMARK_EXCLUDE_URL);
+        $stmt = $pdo->prepare("select 1 from exclude_url where url = :url");
+    }
+    $stmt->bindValue(":url", $url);
+    $stmt->execute();
+    $ret = $stmt->fetch();
+    return ! empty($ret);
+}

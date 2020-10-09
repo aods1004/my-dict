@@ -12,29 +12,48 @@ function get_bookmark_feed_client($account): Client
     return new Client(['base_uri' => 'https://b.hatena.ne.jp/' . $account . '/']);
 }
 
+function get_high_priorty_mark(): array
+{
+    return ["🔖", "🌈👥"];
+}
+
+function get_row_priorty_mark(): array
+{
+    return [
+        "🍀", "🚪", "🌐", "🗣", "💿", "💬", "🛒", "🎨", "✂", "➕", "📋", "📓", "📚",
+        "☕", "💪", "🍴", "🍚", "💊", "💰", "🍬", "🎧", "🔧", "📰", "🤣", "🎮", "🌈にじさんじ"];
+}
+
+function get_veryrow_priorty_mark(): array
+{
+    return ["🍀", "🚪", "🌐", "💬", "🎨", "✂"];
+}
+
 function get_all_bookmarks($useOfflineRss = false): Generator
 {
     if ($useOfflineRss) {
         // download from https://b.hatena.ne.jp/-/my/config/data_management
         $data = simplexml_load_string(file_get_contents(ROOT_DIR . "/data/" . HATENA_MY_ACCOUNT . ".bookmarks.rss"));
-        foreach ($data->item ?? [] as $item) {
-            $ns = $item->getNamespaces(true);
-            $dc = $item->children($ns["dc"]);
-            $subjects = $dc->subject ?? [];
-            $tags = [];
-            foreach ($subjects as $tag) {
-                $tags[] = (string) $tag;
+        if ($data->item !== null) {
+            foreach ($data->item as $item) {
+                $ns = $item->getNamespaces(true);
+                $bookmark_url = (string) $item->attributes($ns["rdf"])->about;
+                $subjects = $item->children($ns["dc"])->subject;
+                $tags = [];
+                foreach ($subjects as $tag) {
+                    $tags[] = (string)$tag;
+                }
+                [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
+                yield [
+                    'url' => (string)$item->link,
+                    'title' => (string)$item->title,
+                    'tags' => $tags,
+                    'comment_raw' => $comment_raw,
+                    'comment' => (string)$item->description,
+                    'created_epoch' => strtotime((string)$item->date),
+                    'bookmark_url' => $bookmark_url,
+                ];
             }
-            list($comment_raw, $tags) = join_comment(
-                $tags, (string)$item->description, strtotime((string)$item->date));
-            yield [
-                'url' => (string)$item->link,
-                'title' => (string)$item->title,
-                'tags' => $tags,
-                'comment_raw' => $comment_raw,
-                'comment' => (string)$item->description,
-                'created_epoch' => strtotime((string)$item->date)
-            ];
         }
     } else {
         $client = get_bookmark_feed_client(HATENA_MY_ACCOUNT);
@@ -48,22 +67,18 @@ function get_all_bookmarks($useOfflineRss = false): Generator
                 break;
             }
             $data = simplexml_load_string($ret->getBody()->getContents());
-            $items = $data->item ?? [];
-            if (empty($items)) {
+            $items = $data->item ?? null;
+            if ($items === null) {
                 break;
             }
             foreach ($items as $item) {
-                /**
-                 * @type $subjects
-                 */
-
                 $ns = $item->getNamespaces(true);
+                $bookmark_url = (string) $item->attributes($ns["rdf"])->about;
                 $dc = $item->children($ns["dc"]);
-
                 $tags = [];
                 if ($dc->subject) {
                     foreach ($dc->subject as $tag) {
-                        $tags[] = (string) $tag;
+                        $tags[] = (string)$tag;
                     }
                 }
                 [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
@@ -73,7 +88,8 @@ function get_all_bookmarks($useOfflineRss = false): Generator
                     'tags' => $tags,
                     'comment_raw' => $comment_raw,
                     'comment' => (string)$item->description,
-                    'created_epoch' => strtotime((string)$item->date)
+                    'created_epoch' => strtotime((string)$item->date),
+                    'bookmark_url' => $bookmark_url,
                 ];
             }
         }
@@ -83,7 +99,7 @@ function get_all_bookmarks($useOfflineRss = false): Generator
 function tag_compare($a, $b): int
 {
     // 先頭に置く
-    $ret = pattern_up_compare(["🔖","🌈👥"], $a, $b);
+    $ret = pattern_up_compare(get_high_priorty_mark(), $a, $b);
     if (!is_null($ret)) {
         return $ret;
     }
@@ -95,18 +111,35 @@ function tag_compare($a, $b): int
     }
 
     // 後ろに下げる
-    $ret = pattern_down_compare(
-        explode(",", "".
-            "🍀,🚪,🌐,🗣,💿,💬,🛒,🎨,✂,➕,📋,📓,📚," .
-            "☕,💪,🍴,🍚,💊,💰,🍬,🎧,🔧,📰,🤣,🎮"),
-        $a, $b);
+    $ret = pattern_down_compare(get_row_priorty_mark(), $a, $b);
     if (!is_null($ret)) {
         return $ret;
     }
-    $personEmoji = ["🌈", "⚓", "🎥", "🎤", "👥", "🀄"];
-    $a = strtr($a, array_combine($personEmoji, array_pad([], count($personEmoji), "")));
-    $b = strtr($b, array_combine($personEmoji, array_pad([], count($personEmoji), "")));
-    return ($a > $b) ? 0 : 1;
+
+    // タグ利用数による比較
+    $ret = pattern_used_count($a, $b);
+    if (!is_null($ret)) {
+        return $ret;
+    }
+    return ($a < $b) ? 0 : 1;
+}
+
+function pattern_used_count($a, $b, bool $resetFlag = false): ?int
+{
+    static $data;
+    if (empty($data) || $resetFlag) {
+        foreach (load_tsv(ROOT_DIR . "/dict/hatebu_tags_use_count.tsv") as $row) {
+            if (isset($row[0])) {
+                $data[$row[0]] = $row[1] ?? 0;
+            }
+        }
+    }
+    $a_count = (int) ($data[$a] ?? 0);
+    $b_count = (int) ($data[$b] ?? 0);
+    if ($a_count === $b_count) {
+        return ($a < $b) ? 0 : 1;
+    }
+    return null;
 }
 
 function pattern_fav_tags($a, $b): ?int
@@ -140,9 +173,6 @@ function pattern_up_compare($chars, $a, $b): ?int
         if (strpos($a, $char) === false && strpos($b, $char) === 0) {
             return 1;
         }
-        if (strpos($a, $char) === 0 && strpos($b, $char) === 0) {
-            return ($a > $b) ? 0 : 1;
-        }
     }
     return null;
 }
@@ -156,18 +186,16 @@ function pattern_down_compare($chars, $a, $b): ?int
         if (strpos($a, $char) === false && strpos($b, $char) === 0) {
             return 0;
         }
-        if (strpos($a, $char) === 0 && strpos($b, $char) === 0) {
-            return ($a > $b) ? 1 : 0;
-        }
     }
     return null;
 }
 
 /**
- * @param $item
+ * @param array $item
+ * @param bool $slice_flag
  * @return array
  */
-function build_hatena_bookmark_comment($item): array
+function build_hatena_bookmark_comment(array $item, bool $slice_flag = true): array
 {
     $comment = !empty($item['comment']) ? trim($item['comment']) : "";
     $created_epoch = !empty($item['created_epoch']) ? $item['created_epoch'] : time();
@@ -177,7 +205,9 @@ function build_hatena_bookmark_comment($item): array
     }
     $tags = array_unique($tags);
     usort($tags, 'tag_compare');
-    $tags = array_slice($tags, 0, 10);
+    if ($slice_flag) {
+        $tags = array_slice($tags, 0, 10);
+    }
     return join_comment($tags, $comment, $created_epoch);
 }
 
@@ -194,10 +224,8 @@ function join_comment($tags, $comment, $created_epoch): array
         $comment_main = trim(str_replace($matches[0], "", $comment));
         $comment = implode(" ", array_filter([$comment_main, $matches[0]]));
     }
-    if (!empty($created_epoch)) {
-        if (! preg_match("/⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/mu", $comment)) {
-            $comment = implode(" ", array_filter([trim($comment), "⌚" . date("Y/m/d H:i", $created_epoch)]));
-        }
+    if (!empty($created_epoch) && !preg_match("/⌚\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/mu", $comment)) {
+        $comment = implode(" ", array_filter([trim($comment), "⌚" . date("Y/m/d H:i", $created_epoch)]));
     }
     $tag_text = !empty($tags) ? "[" . implode("][", $tags) . "]" : "";
     return [$tag_text . $comment, $tags];
@@ -210,9 +238,9 @@ function join_comment($tags, $comment, $created_epoch): array
 function count_helpful_tag(array $tags): int
 {
     $count = 0;
-    $list = explode(",", "🍀,🚪,💬,🌐,🎨,✂");
+    $list = get_veryrow_priorty_mark();
     foreach ($tags as $tag) {
-        if (!in_array(mb_substr($tag, 0, 1), $list)) {
+        if (!in_array(mb_substr($tag, 0, 1), $list, true)) {
             $count++;
         }
     }
@@ -249,7 +277,7 @@ function get_bookmark_api_client(): Client
         'base_uri' => 'https://bookmark.hatenaapis.com/rest/1/',
         'handler' => $stack,
         'auth' => 'oauth',
-        'http_errors' => false,
+        // 'http_errors' => false,
     ]);
 }
 

@@ -12,85 +12,86 @@ $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DS
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
 $usedTagCount = [];
-
+$urls = [];
 
 foreach (get_all_bookmarks() as $rss) {
     Sub::outputLineStart($totalBookmarkCount);
-    try {
-        [$init_url, $url, $title, $tags, $comment_raw] = Sub::extractRssData($rss);
-        $cache_check_basis = strtotime("-1 days");
-        if ($bookmarkApiClient->beNotChange($url, $tags, $comment_raw, $cache_check_basis)) {
-            echo "S";
-            $item = $rss;
-            $init_comment = $rss['comment_raw'];
-        } else {
-            echo ".";
-            $item = $bookmarkApiClient->fetch($url, $tags);
-            if ($item === null) {
-                echo " ##### FAIL TO FETCH BOOKMARK #####" . PHP_EOL;
-                echo " * URL: {$url}" . PHP_EOL;
-                continue;
-            }
-            // エントリーデータの取得・判定
-            $entry = $bookmarkApiClient->fetchEntry($url);
-            if ($entry === null) {
-                echo " ##### FAIL TO FETCH ENTRY #####" . PHP_EOL;
-                echo " * URL: {$url}" . PHP_EOL;
-                continue;
-            }
-            // URLの置き換え
-            $url = $entry->takeOverUrl($url);
-            $init_comment = $item['comment_raw'];
-        }
-        $url = UrlNormalizer::normalize($url);
-        $item['tags'] = create_tags($url, $title, $item['tags']);
-        $overflowTagsCountFlag = (count_helpful_tag($item['tags']) > 10);
-        [$comment, $tags] = build_hatena_bookmark_comment($item);
-
-        foreach ($tags ?: [] as $tag) {
-            $usedTagCount[$tag] = (empty($usedTagCount[$tag])) ? 1 : ($usedTagCount[$tag] + 1);
-        }
-
-        $totalTagCount += count_helpful_tag($tags ?: []);
-        ++$totalBookmarkCount;
-
-        $moveUrlFlag = ($init_url !== $url);
-        $lessTagCountFlag = (count_helpful_tag($tags ?: []) < 1);
-        $changeCommentFlag = ($init_comment !== $comment && !empty($comment));
-
-        if (!$moveUrlFlag && !$lessTagCountFlag && !$changeCommentFlag) {
+    ++$totalBookmarkCount;
+    [$init_url, $url, $title, $tags, $comment_raw] = Sub::extractRssData($rss);
+    $n = random_int(5, 14);
+    $cache_check_basis = strtotime("-$n days");
+    $load_from_hatena_flag = false;
+    if ($bookmarkApiClient->beNotChange($url, $tags, $comment_raw, $cache_check_basis)) {
+        echo ".";
+        $item = $rss;
+        $init_comment = $rss['comment_raw'];
+    } else {
+        echo "L";
+        $item = $bookmarkApiClient->fetch($url, $tags);
+        if ($item === null) {
+            echo "※※※ ブックマークの取得に失敗しました ※※※" . PHP_EOL;
+            echo " * URL: {$url}" . PHP_EOL;
             continue;
         }
+        // エントリーデータの取得・判定
+        $entry = $bookmarkApiClient->fetchEntry($url);
+        if ($entry === null) {
+            echo "※※※ エントリーの取得に失敗しました ※※※" . PHP_EOL;
+            echo " * URL: {$url}" . PHP_EOL;
+            continue;
+        }
+        // URLの置き換え
+        $url = $entry->takeOverUrl($url);
+        $init_comment = $item['comment_raw'];
+        $load_from_hatena_flag = true;
+    }
 
-        Sub::outputEditHeader($totalBookmarkCount);
+    if (isset($urls[$url]) && $urls[$url] !== $rss['bookmark_url']) {
+        echo PHP_EOL . "※※※ URLが重複しています ※※※" . PHP_EOL;
+        echo "TITLE: {$rss['title']}" . PHP_EOL;
+        echo "URL: $url" . PHP_EOL;
+        echo "INIT URL(1): {$urls[$url]}" . PHP_EOL;
+        echo "INIT URL(2): {$rss['bookmark_url']}" . PHP_EOL;
+        echo "ENTRY URL: " . get_hatebu_entry_url($url) . PHP_EOL;
+        continue;
+    }
+
+    $url = UrlNormalizer::normalize($url);
+    $urls[$url] = $rss['bookmark_url'] ?? true;
+    $item['tags'] = create_tags($url, $title, $item['tags']);
+    [$comment, $tags] = build_hatena_bookmark_comment($item);
+    foreach ($tags ?: [] as $tag) {
+        $usedTagCount[$tag] = (empty($usedTagCount[$tag])) ? 1 : ($usedTagCount[$tag] + 1);
+    }
+    $totalTagCount += count_helpful_tag($tags ?: []);
+    $moveUrlFlag = ($init_url !== $url);
+    $less_tag_count_flag = (count_helpful_tag($tags ?: []) < 1);
+    $change_comment_flag = ($init_comment !== $comment && !empty($comment));
+    if (!$moveUrlFlag && !$less_tag_count_flag && !$change_comment_flag && !$load_from_hatena_flag) {
+        continue;
+    }
+    Sub::outputEditHeader($totalBookmarkCount);
+    if ($less_tag_count_flag || $change_comment_flag || $load_from_hatena_flag) {
+        $entryUrl = get_hatebu_entry_url($url);
+        echo " URL:   {$entryUrl}" . PHP_EOL;
         if ($moveUrlFlag) {
-            echo " * AFTER  URL: $url" . PHP_EOL;
-            echo " * BEFORE URL: $init_url" . PHP_EOL;
+            echo "※※※ URL 正規化前のブックマークを削除します ※※※" . PHP_EOL;
+            echo " * DELETE URL: $init_url" . PHP_EOL;
             $ret = $bookmarkApiClient->delete($init_url);
-            echo " * DELETE STATUS CODE: " . $ret->getStatusCode() . PHP_EOL;
         }
-        if ($lessTagCountFlag || $changeCommentFlag) {
-            $entryUrl = get_hatebu_entry_url($url);
-            echo " URL: {$entryUrl}" . PHP_EOL;
-            if ($lessTagCountFlag) {
-                $count = count_helpful_tag($tags);
-                echo "※※※ タグの数が少ないです ($count) ※※※" . PHP_EOL;
-            }
-            if ($changeCommentFlag) {
-                echo " TITLE: " . $title . PHP_EOL;
-                if ($overflowTagsCountFlag) {
-                    $count = count_helpful_tag($item['tags']);
-                    echo "※※※ タグの数が多いです ($count) ※※※" . PHP_EOL;
-                } else {
-                    $bookmarkApiClient->put($url, $comment, $tags);
-                    echo " AFTER  COMMENT: " . $comment . PHP_EOL;
-                    echo " BEFORE COMMENT: " . $init_comment . PHP_EOL;
-                }
-            }
+        echo " TITLE: {$title}" . PHP_EOL;
+        if ($less_tag_count_flag) {
+            $count = count_helpful_tag($tags);
+            echo "※※※ タグの数が少ないです ($count) ※※※" . PHP_EOL;
         }
-    } catch (Throwable $exception) {
-        var_dump($exception);
-        exit;
+        if ($load_from_hatena_flag) {
+            echo "※※※ はてなからデータがロードされました。 ※※※" . PHP_EOL;
+        }
+        if ($change_comment_flag || $load_from_hatena_flag) {
+            $bookmarkApiClient->put($url, $comment, $tags);
+        }
+        echo " AFTER  COMMENT: " . $comment . PHP_EOL;
+        echo " BEFORE COMMENT: " . $init_comment . PHP_EOL;
     }
 }
 
