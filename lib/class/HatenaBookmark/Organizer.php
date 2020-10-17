@@ -2,8 +2,19 @@
 
 namespace Aods1004\MyDict\HatenaBookmark;
 
+use Aods1004\MyDict\BookmarkApiClient;
+
 class Organizer
 {
+    /**
+     * @param BookmarkApiClient $bookmarkApiClient
+     */
+    public static function setBookmarkApiClient($bookmarkApiClient): void
+    {
+        self::$bookmarkApiClient = $bookmarkApiClient;
+    }
+
+    static protected BookmarkApiClient $bookmarkApiClient;
     /**
      * @param $rss
      * @return array
@@ -17,7 +28,16 @@ class Organizer
         $comment_raw =  $rss['comment_raw'];
         return [$initUrl, $url, $title, $tags, $comment_raw];
     }
-
+    public static function checkNotChange($url, $tags, $comment_raw)
+    {
+        try {
+            $n = random_int(10, 30);
+        } catch (\Throwable $e) {
+            $n = 10;
+        }
+        $cache_check_basis = strtotime("-$n days");
+        return static::$bookmarkApiClient->beNotChange($url, $tags, $comment_raw, $cache_check_basis);
+    }
     /**
      * @param $i
      */

@@ -8,6 +8,7 @@ use Aods1004\MyDict\HatenaBookmark\Organizer as Sub;
 
 START:
 $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
+Sub::setBookmarkApiClient($bookmarkApiClient);
 
 $totalTagCount = 0;
 $totalBookmarkCount = 1;
@@ -18,10 +19,9 @@ foreach (get_all_bookmarks() as $rss) {
     Sub::outputLineStart($totalBookmarkCount);
     ++$totalBookmarkCount;
     [$init_url, $url, $title, $tags, $comment_raw] = Sub::extractRssData($rss);
-    $n = random_int(5, 14);
-    $cache_check_basis = strtotime("-$n days");
+
     $load_from_hatena_flag = false;
-    if ($bookmarkApiClient->beNotChange($url, $tags, $comment_raw, $cache_check_basis)) {
+    if (Sub::checkNotChange($url, $tags, $comment_raw)) {
         echo ".";
         $item = $rss;
         $init_comment = $rss['comment_raw'];
@@ -46,14 +46,30 @@ foreach (get_all_bookmarks() as $rss) {
         $load_from_hatena_flag = true;
     }
 
-    if (isset($urls[$url]) && $urls[$url] !== $rss['bookmark_url']) {
-        echo PHP_EOL . "※※※ URLが重複しています ※※※" . PHP_EOL;
-        echo "TITLE: {$rss['title']}" . PHP_EOL;
-        echo "URL: $url" . PHP_EOL;
-        echo "INIT URL(1): {$urls[$url]}" . PHP_EOL;
-        echo "INIT URL(2): {$rss['bookmark_url']}" . PHP_EOL;
-        echo "ENTRY URL: " . get_hatebu_entry_url($url) . PHP_EOL;
-        continue;
+//    if (isset($urls[$url]) && $urls[$url] !== $rss['bookmark_url']) {
+//        echo PHP_EOL . "※※※ URLが重複しています ※※※" . PHP_EOL;
+//        echo "TITLE: {$rss['title']}" . PHP_EOL;
+//        echo "URL: $url" . PHP_EOL;
+//        echo "INIT URL(1): {$urls[$url]}" . PHP_EOL;
+//        echo "INIT URL(2): {$rss['bookmark_url']}" . PHP_EOL;
+//        echo "ENTRY URL: " . get_hatebu_entry_url($url) . PHP_EOL;
+//        continue;
+//    }
+
+    if ($url === $title || preg_match("/%2F/", $title) || preg_match("/&amp;/", $title)) {
+        $client = get_http_client();
+        $response = $client->get($url);
+        $contents = $response->getBody()->getContents();
+        if ((int) $response->getStatusCode() === 200) {
+            preg_match('/<title>(.*)<\/title>/', $contents, $match);
+            if (isset($match[1])) {
+                echo PHP_EOL . "※※※ TITLEがうまく設定されていません ※※※" . PHP_EOL;
+                echo "TITLE: {$rss['title']}" . PHP_EOL;
+                $newTitle = html_entity_decode($match[1]);
+                echo $newTitle . PHP_EOL;
+                echo "ENTRY URL: " . get_hatebu_entry_url($url) . "#" . rawurlencode($newTitle). PHP_EOL;
+            }
+        }
     }
 
     $url = UrlNormalizer::normalize($url);
@@ -94,7 +110,6 @@ foreach (get_all_bookmarks() as $rss) {
         echo " BEFORE COMMENT: " . $init_comment . PHP_EOL;
     }
 }
-
 Sub::recordResults($usedTagCount);
 
 goto START;

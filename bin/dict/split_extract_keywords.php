@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 $results = [];
 $resultSjis = [];
-foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $line) {
+foreach (load_csv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $line) {
     foreach (explode(",", $line[0]) as $word) {
         if (trim($word)) {
             $results[] = trim($word);
@@ -12,7 +12,7 @@ foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $line) {
         }
     }
 }
-foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $line) {
+foreach (load_csv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $line) {
     foreach (explode(",", $line[0]) as $word) {
         if (trim($word)) {
             $results[] = trim($word);

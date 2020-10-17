@@ -1,10 +1,11 @@
 secret.txt
 user.txt
-_tmp
+_tmp/*
+vendor/*
+_logs/*
+_cache/*
 composer.phar
 .idea
-vendor/*
 config.php
-_logs
 youtube-videos.sqlite
 bookmark-items.sqlite

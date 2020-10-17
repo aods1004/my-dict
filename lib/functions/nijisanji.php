@@ -10,7 +10,7 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 function get_ruby_tag_dict(): array
 {
     $tags_dict = [];
-    foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name_hatebu_tags.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/nijisanji_members/name_hatebu_tags.tsv") as $row) {
         $ruby = $row[0] ?? null;
         $tag = $row[1] ?? null;
         if ($ruby && $tag) {
@@ -28,7 +28,7 @@ function get_ruby_tag_dict(): array
 function get_name_ruby_dict(): array
 {
     $name_ruby_dict = [];
-    foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
         $ruby = $row[0] ?? null;
         $name = $row[1] ?? null;
         if ($ruby && $name) {
@@ -49,7 +49,7 @@ function get_name_ruby_dict(): array
 function get_youtube_channel_ids(string $surfix = ""): array
 {
     $ret = [];
-    foreach (load_tsv(ROOT_DIR . "/data/youtube_nijisanji_channel{$surfix}.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/youtube_nijisanji_channel{$surfix}.tsv") as $row) {
         $id = $row[1] ?? null;
         if ($id) {
             $ret[] = trim($id);

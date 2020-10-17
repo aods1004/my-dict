@@ -1,6 +1,5 @@
 <?php
 
-$comment = "";
-if (! preg_match("/^🎦\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/m", $comment, $match)) {
-    $comment = $published_at . " " . $comment;
-}
+require_once __DIR__ . "/vendor/autoload.php";
+
+echo date("ymd H:i:s");

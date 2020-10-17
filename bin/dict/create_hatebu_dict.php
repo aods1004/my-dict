@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 $fh = fopen(ROOT_DIR . "/dict/hatebu_tags.txt", "w");
 $i = 0;
 $notations = [];
-foreach (load_tsv(ROOT_DIR . "/data/hatebu_noun_list.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/hatebu_noun_list.tsv") as $row) {
     list($reading, $notation) = $row;
     $i++;
     $reading = mb_convert_kana($reading, "aHc");

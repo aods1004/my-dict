@@ -7,7 +7,7 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
  * ----------------------------------------------------------------------------------------------
  */
 $data = [];
-foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
     list($ruby, $name) = $row;
     $data[] = $ruby . "\t" . trim($name) . "\t" . rawurlencode(trim($name));
 }

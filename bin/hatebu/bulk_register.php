@@ -8,10 +8,10 @@ $apiClient = get_bookmark_api_client();
 $itemFetcher = new BookmarkApiClient($apiClient);
 $tagExchanger = get_tag_exchanger();
 $no = 0;
-foreach (load_tsv(ROOT_DIR . "/data/hatebu_bulk_register.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/hatebu_bulk_register.tsv") as $row) {
     try {
         echo "### [$no] ######################################################" . PHP_EOL;
-        list($url, $tags) = $row;
+        [$url, $tags] = $row;
         echo "URL: " . $url . PHP_EOL;
         $tags = explode(',', $tags);
         if ($itemFetcher->exist($url)) {
@@ -19,7 +19,7 @@ foreach (load_tsv(ROOT_DIR . "/data/hatebu_bulk_register.tsv") as $row) {
             continue;
         }
         $status = check_url_status($url);
-        if ($status != '200') {
+        if ((int) $status !== 200) {
             echo " ***** 対象ページがありません ($status) *****" . PHP_EOL;
             continue;
         }

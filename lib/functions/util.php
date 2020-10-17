@@ -11,9 +11,10 @@ function sjis_win($word)
 
 /**
  * @param $file_path
+ * @param string $delimiter
  * @return Generator
  */
-function load_tsv($file_path): Generator
+function load_csv($file_path, $delimiter = "\t"): Generator
 {
     $file = file($file_path);
     foreach ($file as $row) {
@@ -21,7 +22,7 @@ function load_tsv($file_path): Generator
             continue;
         }
         $ret = [];
-        $data = explode("\t", $row);
+        $data = explode($delimiter, $row);
         foreach ($data as $datum) {
             $ret[] = trim($datum);
         }

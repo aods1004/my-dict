@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="organizer.php" type="PhpLocalRunConfigurationType" factoryName="PHP Console" singleton="false" path="$PROJECT_DIR$/bin/hatebu/organizer.php">
+  <configuration default="false" name="organizer.php" type="PhpLocalRunConfigurationType" factoryName="PHP Console" singleton="true" path="$PROJECT_DIR$/bin/hatebu/organizer.php">
     <method v="2" />
   </configuration>
 </component>

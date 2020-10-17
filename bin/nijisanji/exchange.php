@@ -12,7 +12,7 @@ $tagExchanger = get_tag_exchanger();
  */
 $output = [];
 $input_dict = [];
-foreach (load_tsv(ROOT_DIR . "/data/input.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/input.tsv") as $row) {
     list($ruby, $url,) = $row;
     if (empty(trim($url))) {
         continue;
@@ -50,7 +50,7 @@ if ($output) {
 }
 
 $output = [];
-foreach (load_tsv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/nijisanji_members/name.tsv") as $row) {
     list($ruby, $name) = $row;
     if (! empty($input_dict[$ruby])) {
         $output[] = $input_dict[$ruby];

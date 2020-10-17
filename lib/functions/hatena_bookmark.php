@@ -29,69 +29,43 @@ function get_veryrow_priorty_mark(): array
     return ["🍀", "🚪", "🌐", "💬", "🎨", "✂"];
 }
 
-function get_all_bookmarks($useOfflineRss = false): Generator
+function get_all_bookmarks(): Generator
 {
-    if ($useOfflineRss) {
-        // download from https://b.hatena.ne.jp/-/my/config/data_management
-        $data = simplexml_load_string(file_get_contents(ROOT_DIR . "/data/" . HATENA_MY_ACCOUNT . ".bookmarks.rss"));
-        if ($data->item !== null) {
-            foreach ($data->item as $item) {
-                $ns = $item->getNamespaces(true);
-                $bookmark_url = (string) $item->attributes($ns["rdf"])->about;
-                $subjects = $item->children($ns["dc"])->subject;
-                $tags = [];
-                foreach ($subjects as $tag) {
+    $client = get_bookmark_feed_client(HATENA_MY_ACCOUNT);
+    $page = 1;
+    while (true) {
+        try {
+            $ret = $client->get("rss", ['query' => ["page" => $page]]);
+            $page++;
+        } catch (Throwable $exception) {
+            var_dump($exception);
+            break;
+        }
+        $data = simplexml_load_string($ret->getBody()->getContents());
+        $items = $data->item ?? null;
+        if ($items === null) {
+            break;
+        }
+        foreach ($items as $item) {
+            $ns = $item->getNamespaces(true);
+            $bookmark_url = (string) $item->attributes($ns["rdf"])->about;
+            $dc = $item->children($ns["dc"]);
+            $tags = [];
+            if ($dc->subject) {
+                foreach ($dc->subject as $tag) {
                     $tags[] = (string)$tag;
                 }
-                [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
-                yield [
-                    'url' => (string)$item->link,
-                    'title' => (string)$item->title,
-                    'tags' => $tags,
-                    'comment_raw' => $comment_raw,
-                    'comment' => (string)$item->description,
-                    'created_epoch' => strtotime((string)$item->date),
-                    'bookmark_url' => $bookmark_url,
-                ];
             }
-        }
-    } else {
-        $client = get_bookmark_feed_client(HATENA_MY_ACCOUNT);
-        $page = 1;
-        while (true) {
-            try {
-                $ret = $client->get("rss", ['query' => ["page" => $page]]);
-                $page++;
-            } catch (Throwable $exception) {
-                var_dump($exception);
-                break;
-            }
-            $data = simplexml_load_string($ret->getBody()->getContents());
-            $items = $data->item ?? null;
-            if ($items === null) {
-                break;
-            }
-            foreach ($items as $item) {
-                $ns = $item->getNamespaces(true);
-                $bookmark_url = (string) $item->attributes($ns["rdf"])->about;
-                $dc = $item->children($ns["dc"]);
-                $tags = [];
-                if ($dc->subject) {
-                    foreach ($dc->subject as $tag) {
-                        $tags[] = (string)$tag;
-                    }
-                }
-                [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
-                yield [
-                    'url' => (string)$item->link,
-                    'title' => (string)$item->title,
-                    'tags' => $tags,
-                    'comment_raw' => $comment_raw,
-                    'comment' => (string)$item->description,
-                    'created_epoch' => strtotime((string)$item->date),
-                    'bookmark_url' => $bookmark_url,
-                ];
-            }
+            [$comment_raw, $tags] = join_comment($tags, (string)$item->description, strtotime((string)$item->date));
+            yield [
+                'url' => (string)$item->link,
+                'title' => (string)$item->title,
+                'tags' => $tags,
+                'comment_raw' => $comment_raw,
+                'comment' => (string)$item->description,
+                'created_epoch' => strtotime((string)$item->date),
+                'bookmark_url' => $bookmark_url,
+            ];
         }
     }
 }
@@ -128,7 +102,7 @@ function pattern_used_count($a, $b, bool $resetFlag = false): ?int
 {
     static $data;
     if (empty($data) || $resetFlag) {
-        foreach (load_tsv(ROOT_DIR . "/dict/hatebu_tags_use_count.tsv") as $row) {
+        foreach (load_csv(ROOT_DIR . "/dict/hatebu_tags_use_count.tsv") as $row) {
             if (isset($row[0])) {
                 $data[$row[0]] = $row[1] ?? 0;
             }
@@ -287,7 +261,7 @@ function get_bookmark_api_client(): Client
 function get_tag_exchanger(): TagExchanger
 {
     $exchange = [];
-    foreach (load_tsv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/tags_exchange.tsv") as $row) {
         [$from, $to] = $row + ["", ""];
         if (empty($from) || empty($to)) {
             continue;
@@ -297,11 +271,11 @@ function get_tag_exchanger(): TagExchanger
         $exchange[$from] = $to;
     }
     $exclude = [];
-    foreach (load_tsv(ROOT_DIR . "/data/tags_unnecessary.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/tags_unnecessary.tsv") as $row) {
         $exclude[] = $row[0];
     }
     $redundant = [];
-    foreach (load_tsv(ROOT_DIR . "/data/tags_redundant.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/tags_redundant.tsv") as $row) {
         [$necessary, $unnecessary] = $row + ["", ""];
         if (empty($necessary) || empty($unnecessary)) {
             continue;
@@ -327,10 +301,10 @@ function get_tag_exchanger(): TagExchanger
             ];
         }
     };
-    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/tags_extract_keywords_fixed.tsv") as $row) {
         $extractKeywordReader($extractKeywords, $row);
     }
-    foreach (load_tsv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/tags_extract_keywords.tsv") as $row) {
         $extractKeywordReader($extractKeywords, $row);
     }
 

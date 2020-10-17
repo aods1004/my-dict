@@ -58,6 +58,35 @@ function set_youtube_video_cache($id, $data)
     $st->execute();
 }
 
+function set_cache($key1, $key2, $data, $width = "unlimited") {
+    $dir = ROOT_DIR . "/_cache/$width/$key1/";
+    if (!is_dir($dir)) {
+        if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+        }
+    }
+    $path = $dir . "/" . md5(json_encode($key2)) . ".json";
+    file_put_contents($path, json_encode($data));
+}
+function get_cache($key1, $key2, $width = "unlimited")
+{
+    $dir = ROOT_DIR . "/_cache/$width/$key1/";
+    $path = $dir . "/" . md5(json_encode($key2)) . ".json";
+    if (! is_file($path)) {
+        return false;
+    }
+    $data = file_get_contents($path);
+    if (empty($data)) {
+        return false;
+    }
+    try {
+        return json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+        return false;
+    }
+}
+
+
 /**
  * @param $channel_id
  * @return array
@@ -66,20 +95,25 @@ function get_all_upload_videos_by_channel_id($channel_id)
 {
     START:
     try {
-        $youtube = get_youtube_client();
-        $part = 'contentDetails';
-        $response = $youtube->channels->listChannels($part, ['id' => $channel_id]);
-        $upload_list_id = null;
-        foreach($response->getItems() as $item) {
-            $upload_list_id =
-                $item->getContentDetails()
-                    ->getRelatedPlaylists()
-                    ->getUploads();
+        $ret = get_cache(__FUNCTION__, $channel_id);
+        if (! $ret) {
+            $youtube = get_youtube_client();
+            $part = 'contentDetails';
+            $response = $youtube->channels->listChannels($part, ['id' => $channel_id]);
+            $upload_list_id = null;
+            foreach($response->getItems() as $item) {
+                $upload_list_id =
+                    $item->getContentDetails()
+                        ->getRelatedPlaylists()
+                        ->getUploads();
+            }
+            if (empty($upload_list_id)) {
+                return [];
+            }
+            $ret =  get_all_upload_videos_by_playlist_id($upload_list_id);
+            set_cache(__FUNCTION__, $channel_id, $ret);
         }
-        if (empty($upload_list_id)) {
-            return [];
-        }
-        return get_all_upload_videos_by_playlist_id($upload_list_id);
+        return $ret;
     } catch (Throwable $exception) {
         if (isset($youtube) && isset($youtube->status)) {
             $youtube->status = false;
@@ -149,35 +183,38 @@ function get_all_search_result($channel_id)
  * @throws Throwable
  */
 function get_all_upload_videos_by_playlist_id($playlist_id) {
-    $ret = [];
-    $pageToken = null;
-    $part = 'id,contentDetails';
-    while(1) {
-        START:
-        try {
-            $youtube = get_youtube_client();
-            $response = $youtube->playlistItems->listPlaylistItems($part, array_filter([
-                'playlistId' => $playlist_id,
-                'maxResults' => 50,
-                'pageToken' => $pageToken,
-            ]));
-            foreach ($response->getItems() as $item) {
-                $data = get_youtube_video($item->getContentDetails()->getVideoId());
-                if ($data) {
-                    $ret[] = $data;
+    $ret = get_cache(__FUNCTION__, $playlist_id, date("Ymd")) ?? [];
+    if (! $ret) {
+        $pageToken = null;
+        $part = 'id,contentDetails';
+        while(1) {
+            START:
+            try {
+                $youtube = get_youtube_client();
+                $response = $youtube->playlistItems->listPlaylistItems($part, array_filter([
+                    'playlistId' => $playlist_id,
+                    'maxResults' => 50,
+                    'pageToken' => $pageToken,
+                ]));
+                foreach ($response->getItems() as $item) {
+                    $data = get_youtube_video($item->getContentDetails()->getVideoId());
+                    if ($data) {
+                        $ret[] = $data;
+                    }
+                };
+                $pageToken = $response->getNextPageToken() ?: null;
+                if (!$pageToken) {
+                    break;
                 }
-            };
-            $pageToken = $response->getNextPageToken() ?: null;
-            if (!$pageToken) {
-                break;
+            } catch (Throwable $exception) {
+                if (isset($youtube) && isset($youtube->status)) {
+                    $youtube->status = false;
+                    goto START;
+                }
+                throw $exception;
             }
-        } catch (Throwable $exception) {
-            if (isset($youtube) && isset($youtube->status)) {
-                $youtube->status = false;
-                goto START;
-            }
-            throw $exception;
         }
+        set_cache(__FUNCTION__, $playlist_id, $ret,date("Ymd"));
     }
     return $ret;
 }
@@ -218,7 +255,7 @@ function get_youtube_video($id)
 
 function get_exclude_url() {
     $ret = [];
-    foreach (load_tsv(ROOT_DIR . "/data/exclude_url.tsv") as $row) {
+    foreach (load_csv(ROOT_DIR . "/data/exclude_url.tsv") as $row) {
         if (isset($row[0])) {
             $ret[trim($row[0])] = true;
         }

@@ -184,7 +184,7 @@ function load_config(): array
         'minimum_tag_count' => 2,
         'file_surfix' => "",
     ];
-    foreach (load_tsv(__DIR__ . "/crawl_channel_videos_config.tsv") as $row) {
+    foreach (load_csv(__DIR__ . "/crawl_channel_videos_config.tsv") as $row) {
         $ret[$row[0]] = $row[1];
     }
     return $ret;

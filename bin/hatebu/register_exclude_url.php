@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 $pdo = new PDO(DSN_BOOKMARK_EXCLUDE_URL);
 
-foreach (load_tsv(ROOT_DIR . "/data/exclude_url.tsv") as $row) {
+foreach (load_csv(ROOT_DIR . "/data/exclude_url.tsv") as $row) {
     $url = $row[0] ?? null;
     if (! $url) {
         continue;

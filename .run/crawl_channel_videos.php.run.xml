@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="crawl_channel_videos.php" type="PhpLocalRunConfigurationType" factoryName="PHP Console" singleton="false" path="$PROJECT_DIR$/bin/nijisanji/crawl_channel_videos.php">
+  <configuration default="false" name="crawl_channel_videos.php" type="PhpLocalRunConfigurationType" factoryName="PHP Console" singleton="true" path="$PROJECT_DIR$/bin/nijisanji/crawl_channel_videos.php">
     <method v="2" />
   </configuration>
 </component>
