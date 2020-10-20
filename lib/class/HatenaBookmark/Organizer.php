@@ -68,9 +68,7 @@ class Organizer
         foreach ($usedTagCount as $tag => $key) {
             $usedTagStat[] = $tag . "\t" . $usedTagCount[$tag];
         }
-        $timestamp = date('Y-m-d_Hi');
         $body = implode(PHP_EOL, $usedTagStat);
-        file_put_contents(ROOT_DIR . "/_logs/hatebu_used_tags_{$timestamp}.tsv", $body);
         file_put_contents(ROOT_DIR . "/dict/hatebu_tags_use_count.tsv", $body);
         pattern_used_count("", "", true);
     }

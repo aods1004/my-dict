@@ -6,6 +6,8 @@ use \Aods1004\MyDict\BookmarkApiClient;
 use \Aods1004\MyDict\UrlNormalizer;
 use Aods1004\MyDict\HatenaBookmark\Organizer as Sub;
 
+empty_file("hatebu_set_titles.txt");
+
 START:
 $bookmarkApiClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
 Sub::setBookmarkApiClient($bookmarkApiClient);
@@ -56,20 +58,12 @@ foreach (get_all_bookmarks() as $rss) {
 //        continue;
 //    }
 
-    if ($url === $title || preg_match("/%2F/", $title) || preg_match("/&amp;/", $title)) {
-        $client = get_http_client();
-        $response = $client->get($url);
-        $contents = $response->getBody()->getContents();
-        if ((int) $response->getStatusCode() === 200) {
-            preg_match('/<title>(.*)<\/title>/', $contents, $match);
-            if (isset($match[1])) {
-                echo PHP_EOL . "※※※ TITLEがうまく設定されていません ※※※" . PHP_EOL;
-                echo "TITLE: {$rss['title']}" . PHP_EOL;
-                $newTitle = html_entity_decode($match[1]);
-                echo $newTitle . PHP_EOL;
-                echo "ENTRY URL: " . get_hatebu_entry_url($url) . "#" . rawurlencode($newTitle). PHP_EOL;
-            }
-        }
+    $alt_title = get_alt_title($title, $url);
+    if ($alt_title) {
+        echo PHP_EOL . "※※※ TITLEがうまく設定されていません ※※※" . PHP_EOL;
+        echo "TITLE: {$rss['title']}" . PHP_EOL;
+        $entry_url = get_hatebu_entry_url($url) . "#" . rawurlencode($alt_title);
+        echo "ENTRY URL: " . tee($entry_url, "hatebu_set_titles.txt") . PHP_EOL;
     }
 
     $url = UrlNormalizer::normalize($url);

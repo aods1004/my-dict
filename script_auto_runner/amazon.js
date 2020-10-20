@@ -1,4 +1,6 @@
+
 adjustCanonicalLinkTag();
+
 const observer = new MutationObserver((mutations) => {
     mutations.forEach(() => {
         adjustCanonicalLinkTag();

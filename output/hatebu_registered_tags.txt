@@ -839,6 +839,7 @@ Web制作
 🎨マンガ動画
 🎮39 Days to Mars
 🎮7 Days to Die
+🎮Among us
 🎮Apex Legends
 🎮Ark
 🎮Atomicrops
@@ -1084,6 +1085,8 @@ Web制作
 💻まうす
 💻キーボード
 💻デバイス
+💻ネットワーク機器
+💻電源
 💼DX
 💼Excel
 💼GTD

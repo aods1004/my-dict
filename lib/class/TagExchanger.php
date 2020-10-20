@@ -55,11 +55,7 @@ class TagExchanger
             foreach ($toItems as $item) {
                 $to = $item['to'];
                 if ($this->checkIncludeWord($haystack, $from)) {
-                    if ($this->checkExcludeWord($haystack, $item['exclude'])) {
-                        $tags = array_filter($tags, function ($value) use ($to) {
-                            return ($value != $to);
-                        });
-                    } else {
+                    if (! $this->checkExcludeWord($haystack, $item['exclude'])) {
                         $appendTags[] = $to;
                     }
                 }

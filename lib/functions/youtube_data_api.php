@@ -95,8 +95,8 @@ function get_all_upload_videos_by_channel_id($channel_id)
 {
     START:
     try {
-        $ret = get_cache(__FUNCTION__, $channel_id);
-        if (! $ret) {
+        $upload_list_id = get_cache(__FUNCTION__, $channel_id);
+        if (! $upload_list_id) {
             $youtube = get_youtube_client();
             $part = 'contentDetails';
             $response = $youtube->channels->listChannels($part, ['id' => $channel_id]);
@@ -110,10 +110,9 @@ function get_all_upload_videos_by_channel_id($channel_id)
             if (empty($upload_list_id)) {
                 return [];
             }
-            $ret =  get_all_upload_videos_by_playlist_id($upload_list_id);
-            set_cache(__FUNCTION__, $channel_id, $ret);
+            set_cache(__FUNCTION__, $channel_id, $upload_list_id);
         }
-        return $ret;
+        return get_all_upload_videos_by_playlist_id($upload_list_id);;
     } catch (Throwable $exception) {
         if (isset($youtube) && isset($youtube->status)) {
             $youtube->status = false;
@@ -134,7 +133,7 @@ function get_all_upload_videos_by_channel_ids(array $list)
         $ret = [];
         foreach ($list as $id) {
             echo "LOAD: " . $id . PHP_EOL;
-            foreach (get_all_upload_videos_by_channel_id($id) as $item) {
+            foreach (get_all_upload_videos_by_channel_id($id) ?? [] as $item) {
                 $ret[] = $item;
             }
         }
@@ -201,7 +200,7 @@ function get_all_upload_videos_by_playlist_id($playlist_id) {
                     if ($data) {
                         $ret[] = $data;
                     }
-                };
+                }
                 $pageToken = $response->getNextPageToken() ?: null;
                 if (!$pageToken) {
                     break;

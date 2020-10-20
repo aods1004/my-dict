@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Aods1004\MyDict\TagExchanger;
+use \Aods1004\MyDict\UrlNormalizer;
 
 function get_bookmark_feed_client($account): Client
 {
@@ -27,6 +28,43 @@ function get_row_priorty_mark(): array
 function get_veryrow_priorty_mark(): array
 {
     return ["🍀", "🚪", "🌐", "💬", "🎨", "✂"];
+}
+
+function get_alt_title($title, $url)
+{
+    if ($url === $title
+        || preg_match("/%2F/", $title)
+        || preg_match("/&amp;/", $title)
+        || preg_match("/&#39;/", $title)
+    ) {
+        $client = get_http_client();
+        try {
+            if (UrlNormalizer::isYouTubeVideoUrl($url)) {
+                parse_str(parse_url($url)["query"], $query);
+                if (!empty($query['v'])) {
+                    $video = get_youtube_video($query['v']);
+                    if ($video) {
+                        return $video["title"] . " - YouTube";
+                    }
+                    return false;
+                }
+            } else {
+                $response = $client->get($url);
+                $contents = $response->getBody()->getContents();
+                preg_match('/<title>(.*)<\/title>/', $contents, $match);
+                if ((int) $response->getStatusCode() === 200) {
+                    if (isset($match[1])) {
+                        $title = strtr($match[1], ["&#39;" => "'", ]);
+                        return html_entity_decode($title);
+                    }
+                }
+            }
+
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+    return false;
 }
 
 function get_all_bookmarks(): Generator

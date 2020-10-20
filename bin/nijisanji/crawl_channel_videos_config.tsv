@@ -1,7 +1,7 @@
-! ファイル名
-file_surfix	_noload
 ! テストならはてなに投稿しない
 skip_register_phase	1
+! ファイル名
+!	file_surfix	_noload
 ! はてなに登録ずみのエントリーをスキップする
 skip_registered_entry	1
 ! キーワード抽出に説明欄を加えるか？

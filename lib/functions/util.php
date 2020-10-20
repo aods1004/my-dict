@@ -4,6 +4,17 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 use GuzzleHttp\Client;
 
+function empty_file($file)
+{
+    file_put_contents(ROOT_DIR . "/output/" . $file, "");
+}
+
+function tee($line, $file = "output.tsv")
+{
+    file_put_contents(ROOT_DIR . "/output/" . $file, $line . PHP_EOL, FILE_APPEND);
+    return $line;
+}
+
 function sjis_win($word)
 {
     return mb_convert_encoding($word, "SJIS-win");
@@ -37,7 +48,9 @@ function get_http_client(): Client
 {
     return new Client(['http_errors' => false,]);
 }
-function get($url, array $option = []) {
+
+function get($url, array $option = [])
+{
     $client = get_http_client();
     try {
         $ret = $client->get($url, $option);

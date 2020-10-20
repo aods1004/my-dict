@@ -67,6 +67,10 @@ try {
         if (!check_fulfill_tag_count_condition($tags)) {
             goto OUTPUT_INFO;
         }
+        // にじさんじ関連のタグが設定されているか？
+        if (!check_exist_nijisanji_tag($tags)) {
+            goto OUTPUT_INFO;
+        }
         // 準備フラグがたっていれば、登録をスキップ
         /** @noinspection DisconnectedForeachInstructionInspection */
         if ($skip_register_phase_flag) {
@@ -135,6 +139,26 @@ function check_over_tag_limit($tags): bool
     }
     return true;
 }
+/**
+ * @param $tags
+ * @return bool
+ */
+function check_exist_nijisanji_tag($tags): bool
+{
+    $flag = false;
+    foreach ($tags as $tag) {
+        if (strpos($tag, "🌈") === 0) {
+            $flag = true;
+        }
+    }
+    if (! $flag) {
+        echo "! ***** ERROR ****************" . PHP_EOL;
+        echo "! ***** にじさんじ関連のタグがありません *****" . PHP_EOL;
+        return false;
+    }
+    return true;
+}
+
 
 /**
  * @param $tags
