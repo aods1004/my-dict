@@ -133,8 +133,11 @@ function get_all_upload_videos_by_channel_ids(array $list)
         $ret = [];
         foreach ($list as $id) {
             echo "LOAD: " . $id . PHP_EOL;
-            foreach (get_all_upload_videos_by_channel_id($id) ?? [] as $item) {
-                $ret[] = $item;
+            $list = get_all_upload_videos_by_channel_id($id);
+            if (is_array($list)) {
+                foreach ($list as $item) {
+                    $ret[] = $item;
+                }
             }
         }
         return $ret;

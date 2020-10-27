@@ -5,6 +5,6 @@ skip_register_phase	1
 ! はてなに登録ずみのエントリーをスキップする
 skip_registered_entry	1
 ! キーワード抽出に説明欄を加えるか？
-include_description	1
+include_description	0
 ! 最低タグ設定数
 minimum_tag_count	1
