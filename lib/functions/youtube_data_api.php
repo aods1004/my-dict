@@ -93,7 +93,6 @@ function get_cache($key1, $key2, $width = "unlimited")
  */
 function get_all_upload_videos_by_channel_id($channel_id)
 {
-    START:
     try {
         $upload_list_id = get_cache(__FUNCTION__, $channel_id);
         if (! $upload_list_id) {
@@ -114,10 +113,6 @@ function get_all_upload_videos_by_channel_id($channel_id)
         }
         return get_all_upload_videos_by_playlist_id($upload_list_id);;
     } catch (Throwable $exception) {
-        if (isset($youtube) && isset($youtube->status)) {
-            $youtube->status = false;
-            goto START;
-        }
         var_dump($exception);
         exit;
     }
@@ -190,7 +185,6 @@ function get_all_upload_videos_by_playlist_id($playlist_id) {
         $pageToken = null;
         $part = 'id,contentDetails';
         while(1) {
-            START:
             try {
                 $youtube = get_youtube_client();
                 $response = $youtube->playlistItems->listPlaylistItems($part, array_filter([
@@ -209,9 +203,12 @@ function get_all_upload_videos_by_playlist_id($playlist_id) {
                     break;
                 }
             } catch (Throwable $exception) {
-                if (isset($youtube) && isset($youtube->status)) {
-                    $youtube->status = false;
-                    goto START;
+                if ($exception->getCode() === 404) {
+                    break;
+                }
+                if ($exception->getCode() === 403) {
+                    var_dump($exception->getMessage());
+                    exit;
                 }
                 throw $exception;
             }
@@ -276,4 +273,21 @@ function is_exclude_url($url): bool
     $stmt->execute();
     $ret = $stmt->fetch();
     return ! empty($ret);
+}
+function is_exclude_word($word): bool
+{
+    static $list = [];
+    if (empty($list)) {
+        foreach (load_csv(ROOT_DIR . "/data/exclude_words.tsv") as $row) {
+            if (isset($row[0])) {
+                $list[] = trim($row[0]);
+            }
+        }
+    }
+    foreach ($list as $_) {
+        if (strpos($word, $_) !== false) {
+            return true;
+        }
+    }
+    return false;
 }

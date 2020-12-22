@@ -44,7 +44,7 @@ try {
             $comment = $published_at . " " . $comment;
         }
         $extract_base = $title . ($include_description_flag ? $video['description'] : $title);
-        if (check_exclude_url($url)) {
+        if (check_exclude($url, $extract_base)) {
             continue;
         }
         ob_start();
@@ -118,11 +118,18 @@ function extract_bookmark($bookmark): array
 
 /**
  * @param $url
+ * @param $word
  * @return bool
  */
-function check_exclude_url($url): bool
+function check_exclude($url, $word): bool
 {
-    return is_exclude_url($url);
+    if (is_exclude_url($url)) {
+        return true;
+    }
+    if (is_exclude_word($word)) {
+        return true;
+    }
+    return false;
 }
 
 /**
