@@ -18,6 +18,7 @@ $minimum_tag_count = $config['minimum_tag_count'];
 $bookmarkClient = new BookmarkApiClient(get_bookmark_api_client(), new PDO(DSN_BOOKMARK));
 $no = 0;
 $output = [];
+$data = [];
 try {
     $register_set = [];
     $count = 0;
@@ -83,6 +84,7 @@ try {
         CLEAN_UP:
         clean_up();
         $output[] = ob_get_flush();
+        $data[] = compact("url", "title", "output_comment");
     }
     if ($register_set) {
         echo "# POST TO HATEBU ###############################################" . PHP_EOL;
@@ -96,6 +98,8 @@ try {
 }
 $output = array_reverse($output);
 file_put_contents(ROOT_DIR . "/output/output.tsv", implode(PHP_EOL, $output));
+$data = array_reverse($data);
+file_put_contents(ROOT_DIR . "/www/data/hatebu_youtube_temp.json", json_encode($data));
 
 if ($skip_register_phase_flag) {
     sleep(5);
@@ -154,7 +158,7 @@ function check_exist_nijisanji_tag($tags): bool
 {
     $flag = false;
     foreach ($tags as $tag) {
-        if (strpos($tag, "🌈") === 0) {
+        if (strpos($tag, "🌈") !== false) {
             $flag = true;
         }
     }
