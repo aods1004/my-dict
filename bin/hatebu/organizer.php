@@ -4,7 +4,8 @@ require_once dirname(__DIR__) . "/../vendor/autoload.php";
 
 use \Aods1004\MyDict\BookmarkApiClient;
 use \Aods1004\MyDict\UrlNormalizer;
-use Aods1004\MyDict\HatenaBookmark\Organizer as Sub;
+use \Aods1004\MyDict\HatenaBookmark\Organizer as Sub;
+use \GuzzleHttp\Exception\GuzzleException;
 
 empty_file("hatebu_set_titles.txt");
 
@@ -98,7 +99,12 @@ foreach (get_all_bookmarks() as $rss) {
             echo "※※※ はてなからデータがロードされました。 ※※※" . PHP_EOL;
         }
         if ($change_comment_flag || $load_from_hatena_flag) {
-            $bookmarkApiClient->put($url, $comment, $tags);
+            try {
+                $bookmarkApiClient->put($url, $comment, $tags);
+            } catch (GuzzleException $exception) {
+                echo "※※※ エラー ※※※" . PHP_EOL;
+            }
+
         }
         echo " AFTER  COMMENT: " . $comment . PHP_EOL;
         echo " BEFORE COMMENT: " . $init_comment . PHP_EOL;
